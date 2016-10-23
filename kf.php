@@ -9,7 +9,7 @@
 
 // control cache headers
 ob_start();
-DEFINE('HTTP_CACHE', 60); # set cache in seconds requires apache mod_headers, but still apache/varnish can override this
+DEFINE('HTTP_CACHE', 0); # set cache in seconds requires apache mod_headers, but still apache/varnish can override this
 // var_dump($_SERVER);
 if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
   if(strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) > (time() - HTTP_CACHE)) {
@@ -115,6 +115,19 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 		'Hard',
 		'Suicidal',
 		'Hell',
+	);
+
+	// assign special achievements to map
+	$collectibles = array(
+		'destroyskulls'              => 'Clandestine',
+		'blindingbigbrother'         => 'Fright Yard',
+		'destroy25gnomesinhillbilly' => 'Hillbilly Horror',
+		'butitsallred'               => 'Moonbase',
+		'destroybeersteins'          => 'Siren\'s Belch',
+		'destroypukeydolls'          => 'Steamland',
+		'destroygoldbags'            => 'Stronghold',
+		'collectsnowglobes'          => 'Thrills Chills',
+		'destroydnavials'            => 'Transit',
 	);
 
 	//Visible names and types (for icons) for stats
@@ -293,7 +306,7 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 	);
 
 	//Count of other (non-maps) achievements
-	$other_count = 141;
+	$other_count = 141 - count($collectibles); # TODO: verify this
 
 	//Only applicable when using MySQL database
 	$cache_time = 10; // 60 * 5 -> 5 minutes
@@ -360,7 +373,7 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 	}
 
 	// return specific string if map is Long game or not.
-	function isLongGameStr($mapname, $out_yes=' <span title="Achievement on Long Game is required">(Long)</span> ', $out_no='')
+	function isLongGameStr($mapname, $out_yes=' <span title="Win on Long Game is required">Long</span> ', $out_no='')
 	{
 		global $map_longgame;
 		// return data from table because it was processed before
@@ -374,6 +387,18 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 		}
 
 	}
+
+	// convert collectible achievement to map name
+	function getcollectibleMap($apiname)
+	{
+		global $collectibles;
+
+		if (array_key_exists($apiname, $collectibles))
+			return $collectibles[$apiname];
+		else
+			return NULL;
+	}
+
 
 	function getPlayerPerksLevels(&$player) {
 		global $perks;
@@ -459,6 +484,20 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 						} else
 							if ((int)$ach->value == 1)
 								$p['achs']['other_closed']++;
+
+						$cmap = getCollectibleMap((string)$ach->APIName);
+						if ( $cmap !== NULL ){
+							if ((int)$ach->value == 1) {
+								$p['achs']['collectibles'][$cmap] = true;
+								$p['achs']['other_closed']--; // dont count succesful collectibles as other
+							}
+							else {
+								$p['achs']['collectibles'][$cmap] = false;
+							}
+
+
+						}
+
 					}
 				}
 				if (isset($xml->stats->item)) {
@@ -478,6 +517,8 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 
 	$playerlist = getAchievements($playerlist);
 	// var_dump($map_longgame);
+	// var_dump($playerlist);
+	//var_dump($playerlist[0]['achs']);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -531,6 +572,12 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 				color: #777;
 				margin: 1px;
 			}
+			.achievement_non_exist {
+				text-align: center;
+				background-color: #000;
+				color: #333;
+				margin: 1px;
+			}
 			#maps td.invisible {
 				border: none;
 				background: none;
@@ -543,8 +590,8 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 				display: block;
 			}
 			#maps .maps {
-				width: 150px;
-			}
+/*				width: 150px;
+*/			}
 			#maps tr.map-row:hover {
 				background: #151515;
 			}
@@ -684,18 +731,40 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 					<table>
 						<tbody>
 							<tr>
-								<td class="maps"><?=t('Maps')?></td>
+								<td class="maps">
+									<?=t('Maps')?>
+								</td>
+								<td>
+									<?=t('Game')?>
+								</td>
 								<td class="invisible"/>
 <?PHP	foreach($playerlist as $p) { ?>
-								<td colspan="<?=count($difficultylist)?>"><a href="http://steamcommunity.com/profiles/<?=$p['id']?>/stats/KillingFloor" target="_blank"<?=($p['profile_private'] === true)?' style="color: #aaa"':''?>><?=$p['name']?></a></td>
+										        <!-- difficulty + collectible column -->
+								<td colspan="<?=(count($difficultylist)+1)?>">
+									<a href="http://steamcommunity.com/profiles/<?=$p['id']?>/stats/KillingFloor" target="_blank"<?=($p['profile_private'] === true)?' style="color: #aaa"':''?>>
+										<?=$p['name']?>
+									</a>
+								</td>
 								<td class="invisible"/>
 <?PHP	} ?>
 							</tr>
 <?PHP	foreach($maplist as $m => $apinames) { ?>
 							<tr class="map-row">
-								<td><?=$m?><?=isLongGameStr($m)?></td>
+								<td>
+									<?=$m?>
+								</td>
+								<td>
+									<?=isLongGameStr($m)?>
+								</td>
 								<td class="invisible"/>
 <?PHP		foreach($playerlist as $p) {
+				// collectibles
+				if(array_key_exists($m, $p['achs']['collectibles'])) { ?>
+								<td class="<?=(($p['achs']['collectibles'][$m] === true)?'achievement_unlocked':(($p['achs']['collectibles'][$m] === false)?'achievement_locked':'achievement_not_exists'))?>">Co</td>
+<?PHP 			} else { ?>
+								<td class="achievement_not_exists">&nbsp;&nbsp;</td>
+<?PHP 			};
+				// difficulty achievements per map
 				foreach($difficultylist as $d) { ?>
 								<td class="<?=(($p['achs'][$d][$m] === true)?'achievement_unlocked':(($p['achs'][$d][$m] === false)?'achievement_locked':'achievement_unknown'))?>"><?=substr($d, 0, 2)?></td>
 <?PHP			} ?>
@@ -703,11 +772,19 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 <?PHP		} ?>
 							</tr>
 <?PHP	} ?>
+
+<!-- Map achievements -->
+
 							<tr style="height: 50px">
-								<td colspan="2" class="invisible"/>
+								<td class="invisible">
+									<?=t('Map achievements')?>
+								</td>
+								<td class="invisible"/>
+								<td class="invisible"/>
+								<td class="invisible"/>
 <?PHP	foreach($playerlist as $p) {
 			$p['percent'] = floor($p['achs']['maps_closed'] / $mapachs_count * 100); ?>
-								<td colspan="<?=count($difficultylist)?>" class="invisible" style="text-align: center">
+								<td colspan="<?=(count($difficultylist)+1)?>" class="invisible" style="text-align: center">
 <?PHP		if($p['percent'] == 100) { ?>
 									<strong class="complete">100%<br/><?=t('Completion')?></strong>
 <?PHP		} else { ?>
@@ -718,12 +795,40 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 								<td class="invisible"/>
 <?PHP	} ?>
 							</tr>
+
+<!-- Collectible map achievements -->
 							<tr style="border-top: 1px solid #777; height: 50px;">
-								<td class="invisible"><?=t('Other achievements')?></td>
+								<td class="invisible">
+									<?=t('Map Collectibles')?>
+								</td>
+								<td class="invisible"/>
+								<td class="invisible"/>
+								<td class="invisible"/>
+<?PHP	foreach($playerlist as $p) {
+			$p['percent_c'] = floor(array_sum($p['achs']['collectibles']) / count($collectibles) * 100) ?>
+								<td colspan="<?=(count($difficultylist)+1)?>" class="invisible" style="text-align: center">
+<?PHP		if($p['percent_c'] == 100) { ?>
+									<strong class="complete">100%<br/><?=t('Completion')?></strong>
+<?PHP		} else { ?>
+								<?=$p['percent_c']?>%<br/>
+								<?=array_sum($p['achs']['collectibles'])?> / <?=count($collectibles)?>
+<?PHP		} ?>
+								</td>
+								<td class="invisible"/>
+<?PHP	} ?>
+							</tr>
+
+<!-- Other achievements -->
+							<tr style="border-top: 1px solid #777; height: 50px;">
+								<td class="invisible">
+									<?=t('Other achievements')?>
+								</td>
+								<td class="invisible"/>
+								<td class="invisible"/>
 								<td class="invisible"/>
 <?PHP	foreach($playerlist as $p) {
 			$p['o_percent'] = floor($p['achs']['other_closed'] / $other_count * 100); ?>
-								<td colspan="<?=count($difficultylist)?>" class="invisible" style="text-align: center">
+								<td colspan="<?=(count($difficultylist)+1)?>" class="invisible" style="text-align: center">
 <?PHP		if($p['o_percent'] == 100) { ?>
 									<strong class="complete">100%<br/><?=t('Completion')?></strong>
 <?PHP		} else { ?>
@@ -735,10 +840,14 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 <?PHP	} ?>
 							</tr>
 							<tr style="border-top: 1px solid #777; height: 50px;">
-								<td class="invisible"><?=t('Perks')?></td>
+								<td class="invisible">
+									<?=t('Perks')?>
+								</td>
+								<td class="invisible"/>
+								<td class="invisible"/>
 								<td class="invisible"/>
 <?PHP	foreach($playerlist as $p) { ?>
-								<td colspan="<?=count($difficultylist)?>" class="invisible perk_container" style="text-align: center">
+								<td colspan="<?=(count($difficultylist)+1)?>" class="invisible perk_container" style="text-align: center">
 <?PHP		foreach($perks as $perk_id => $perk) { ?>
 									<span class="perk perk_<?=$perk_id . ($p['perks'][$perk_id] < 6 ? '_red perk_red' : '')?>"><?=$p['perks'][$perk_id]?></span>
 <?PHP		} ?>
@@ -858,6 +967,7 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 			<div class="box">
 				<h3><?=t('Legend')?>:</h3>
 				<ul>
+					<li>Co: <?=t('Collectibles')?></li>
 					<li>No: <?=t('Normal')?></li>
 					<li>Ha: <?=t('Hard')?></li>
 					<li>Su: <?=t('Suicidal')?></li>
