@@ -2,14 +2,32 @@
 /*  Copyright (C) 2012, Luki
  *  http://luki.net.pl | luki@luki.net.pl
  *  Original layout by PixelDuck (http://nyssa.me), a member of Sykosis clan (http://sykosis.co.uk), modified by Luki
- *  
+ *
  *  This script is distributed under the GNU General Public License version 3.
  *  Please do not remove link to the original author's website and above informations about author/contributors.
  */
- 
+
+// control cache headers
+ob_start();
+DEFINE('HTTP_CACHE', 60); # set cache in seconds requires apache mod_headers, but still apache/varnish can override this
+// var_dump($_SERVER);
+if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+  if(strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) > (time() - HTTP_CACHE)) {
+    header('HTTP/1.1 304 Not Modified');
+	//$mod_since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+	//$gtime = gmdate('D, d M Y H:i:s', time() + HTTP_CACHE);
+    // header('HTTP/1.1 304 Not Modified'.' modsince-'.$mod_since.' gtime-'.$gtime); # sigh debug
+    exit;
+  }
+}
+
+header('Expires: '.gmdate('D, d M Y H:i:s', time() + HTTP_CACHE).' GMT');
+header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
+header('Cache-Control: max-age='.HTTP_CACHE.', public');
+
 //------ CONFIGURATION AREA ------\\
 	DEFINE('KFStats', 'http://steamcommunity.com/profiles/%s/statsfeed/1250/?schema=1');
-	
+
 	//MySQL Database (optional, used only for cache)
 	DEFINE('db_enabled', false);
 	DEFINE('db_host', 'DATABASE HOST');
@@ -17,11 +35,11 @@
 	DEFINE('db_pass', 'DATABASE PASS');
 	DEFINE('db_name', 'DATABASE NAME');
 	DEFINE('db_table', 'kfstats_cache');
-	
+
 	DEFINE('FILES_PATH', ''); //relative path to additional files (jQuery + swf with chart)
 	DEFINE('CHART_WIDTH', 1000);
 	DEFINE('CHART_HEIGHT', 550);
-	
+
 	$playerlist = array(
 		//list of players' profiles (SteamID64 + display name)
 		array('id' => '76561197960302541', 'name' => '_KaszpiR_'),
@@ -30,12 +48,12 @@
 		//array('id' => '76561198000639694', 'name' => 'Drozdzers'),
 		//array('id' => '76561197996656102', 'name' => 'Garret'),
 		//array('id' => '76561197992296179', 'name' => 'Ghost'),
-		array('id' => '76561197993535598', 'name' => 'itsnotlupus'),
+		// array('id' => '76561197993535598', 'name' => 'itsnotlupus'),
 		//array('id' => '76561198067389578', 'name' => 'Idas'),
 		//array('id' => '76561197995298791', 'name' => 'Jasiuuu'),
 		//array('id' => '76561197999916174', 'name' => 'Kenny'),
 		//array('id' => '76561198033119209', 'name' => 'Lambert'),
-		array('id' => '76561197990812049', 'name' => 'stranded'),
+		// array('id' => '76561197990812049', 'name' => 'stranded'),
 		//array('id' => '76561197986850947', 'name' => 'Mhrok'),
 		//array('id' => '76561197998372064', 'name' => 'Olo'),
 		array('id' => '76561197966406409', 'name' => 'Ogoor'),
@@ -48,7 +66,7 @@
 		array('id' => '76561197961622176', 'name' => 'Zuko'),
 		//array('id' => '76561197973995552', 'name' => 'ZuLislaw'),
 	);
-	
+
 	//List of maps in English achievements descriptions
 	//'Map name' => array('of', 'apinames', 'of', 'map-related', 'achievements') or false if not required
 	$maplist = array(
@@ -89,7 +107,8 @@
 		'West London'			=> false,
 		'Wyre'					=> false,
 	);
-	
+	ksort($maplist);
+
 	//Similar as above
 	$difficultylist = array(
 		'Normal',
@@ -97,7 +116,7 @@
 		'Suicidal',
 		'Hell',
 	);
-	
+
 	//Visible names and types (for icons) for stats
 	$statlist = array(
 		'kills'								=> array('visible_name' => 'Total Kills', 'type' => 'misc'),
@@ -111,46 +130,46 @@
 		'droppedtier3weapons'				=> array('visible_name' => 'Dropped Tier3 Weapons', 'type' => 'misc'),
 		'halloweenkills'					=> array('visible_name' => 'Halloween Zeds killed', 'type' => 'misc'),
 		'halloweenscrakekills'				=> array('visible_name' => 'Halloween Scrakes killed', 'type' => 'misc'),
-		
+
 		'damagehealed'						=> array('visible_name' => 'Damage Healed', 'type' => 'medic'),
 		'selfheals'							=> array('visible_name' => 'Self Heals', 'type' => 'medic'),
 		'teammateshealedwithmp7'			=> array('visible_name' => 'Teammates Healed With MP7 Medic Gun', 'type' => 'medic'),
 		'xmaspointshealedwithmp5'			=> array('visible_name' => 'XMas point healed with MP5', 'type' => 'medic'),
-		
+
 		'shotgundamage'						=> array('visible_name' => 'Support Damage', 'type' => 'support'),
 		'weldingpoints'						=> array('visible_name' => 'Welding Points', 'type' => 'support'),
 		'fleshpoundskilledwithaa12'			=> array('visible_name' => 'Fleshpounds Killed With AA12 Shotgun', 'type' => 'support'),
-		
+
 		'headshotkills'						=> array('visible_name' => 'Sharpshooter Kills', 'type' => 'sharp'),
 		'burningcrossbowkills'				=> array('visible_name' => 'Burning Crossbow Kills', 'type' => 'sharp'),
-		
+
 		'bullpupdamage'						=> array('visible_name' => 'Commando Damage', 'type' => 'commando'),
 		'stalkerkills'						=> array('visible_name' => 'Stalkers Killed', 'type' => 'commando'),
 		'enemieskilledwithscar'				=> array('visible_name' => 'Enemies Killed with SCAR', 'type' => 'commando'),
 		'enemieskilledwithfnfal'			=> array('visible_name' => 'Enemies killed with FN-Fal', 'type' => 'commando'),
 		'enemieskilledwithbullpup'			=> array('visible_name' => 'Enemies killed with Bullpup', 'type' => 'commando'),
-		
+
 		'meleedamage'						=> array('visible_name' => 'Melee Damage', 'type' => 'berserker'),
-		
+
 		'flamethrowerdamage'				=> array('visible_name' => 'Firebug Damage', 'type' => 'firebug'),
 		'mac10burndamage'					=> array('visible_name' => 'Mac10 Burn Damage', 'type' => 'firebug'),
 		'xmashuskskilledwithhuskcannon'		=> array('visible_name' => 'XMas Husks killed with Husk cannon', 'type' => 'firebug'),
-		
+
 		'explosivesdamage'					=> array('visible_name' => 'Demolition Damage', 'type' => 'demo'),
 		'gibbedfleshpounds'					=> array('visible_name' => 'Gibbed Fleshpounds', 'type' => 'demo'),
 		'stalkerskilledwithexplosives'		=> array('visible_name' => 'Stalkers Killed with Explosives', 'type' => 'demo'),
 		'gibbedenemies'						=> array('visible_name' => 'Gibbed Enemies', 'type' => 'demo'),
 		'demolitionspipebombkills'			=> array('visible_name' => 'Demolitions Pipebomb Kills', 'type' => 'demo'),
 		'enemiesgibbedwithm79'				=> array('visible_name' => 'Enemies Gibbed with M79', 'type' => 'demo'),
-		
+
 		'zedsetfirewithtrenchonhillbilly'	=> array('visible_name' => 'Zeds Set On Fire With Trench (HillBilly)', 'type' => 'misc'),
 		'zedkilledduringhillbilly'			=> array('visible_name' => 'Zeds Killed During HillBilly', 'type' => 'misc'),
 		// 'stat46'							=> array('visible_name' => 'HillBilly Achievements Completed', 'type' => 'misc'),
-		
+
 		'fleshpoundskilledwithaxe'			=> array('visible_name' => 'Fleshpounds Killed with Axe', 'type' => 'misc'),
 		'zedskilledwhileairborne'			=> array('visible_name' => 'Zeds Killed While Airbone', 'type' => 'misc'),
 		'zedskilledwhilezapped'				=> array('visible_name' => 'Zeds Killed While Zapped', 'type' => 'misc'),
-		
+
 		// 'testing1'						=> array('visible_name' => 'Stat XX', 'type' => 'misc'),
 		//'medicprestige'						=> array('visible_name' => 'Medic Prestige', 'type' => 'medic'),
 		//'supportprestige'					=> array('visible_name' => 'Support Prestige', 'type' => 'support'),
@@ -160,7 +179,7 @@
 		//'firebugprestige'					=> array('visible_name' => 'Firebug Prestige', 'type' => 'firebug'),
 		//'demoprestige'						=> array('visible_name' => 'Demo Prestige', 'type' => 'demo'),
 	);
-	
+
 	//List with in-game perks and requirements for promotion to a higher level
 	$perks = array(
 		'medic'		=> array(
@@ -271,23 +290,23 @@
 			),
 		),
 	);
-	
+
 	//Count of other (non-maps) achievements
 	$other_count = 141;
-	
+
 	//Only applicable when using MySQL database
 	$cache_time = 10; // 60 * 5 -> 5 minutes
-		
+
 //------ END OF CONFIGURATION ------\\
-	
+
 	$mapachs_count = count($maplist) * count($difficultylist);
-	
+
 	function t($phrase) {
 		global $translations;
 		//TO DO
 		return $phrase;
 	}
-	
+
 	function getMap($ach_desc, $apiname)
 	{
 		global $maplist;
@@ -301,17 +320,60 @@
 		}
 		return false;
 	}
-	
+
 	function getDifficulty($ach_desc)
 	{
 		global $difficultylist;
-		
+
 		foreach ($difficultylist as $difficulty)
 			if (strpos($ach_desc, $difficulty) !== false)
 				return $difficulty;
 		return false;
 	}
-	
+
+	/*
+		get if map achievement is required to be performed on 'Long Game'
+		returns true or false (or null if map missing)
+	*/
+	$map_longgame = array ();
+	function getLongGame($mapname, $ach_desc)
+	{
+		global $maplist, $map_longgame;
+		if ($mapname === false) return null;
+
+		// return data from table because it was processed before
+		if (array_key_exists($mapname, $map_longgame))
+			return $map_longgame[$mapname];
+		else {
+			// set value to array
+			if ( strpos($ach_desc, 'Long Game') !== false){
+				$map_longgame[$mapname] = true;
+			}
+			else {
+				$map_longgame[$mapname] = false;
+			}
+			// return data from array
+			return $map_longgame[$mapname];
+		};
+
+	}
+
+	// return specific string if map is Long game or not.
+	function isLongGameStr($mapname, $out_yes=' <span title="Achievement on Long Game is required">(Long)</span> ', $out_no='')
+	{
+		global $map_longgame;
+		// return data from table because it was processed before
+		if (!array_key_exists($mapname, $map_longgame)) return '';
+
+		if ($map_longgame[$mapname]) {
+			return $out_yes;
+		}
+		else{
+			return $out_no;
+		}
+
+	}
+
 	function getPlayerPerksLevels(&$player) {
 		global $perks;
 		$player['perks'] = array();
@@ -328,16 +390,16 @@
 			$player['perks'][$perk_id] = min($level);
 		}
 	}
-	
+
 	function getAchievements($players) {
 		global $cache_time;
-		
+
 		$db = db_enabled ? @mysql_connect(db_host, db_user, db_pass) : false;
 		if ($db)
 			mysql_select_db(db_name, $db);
-	
+
 		$mc = curl_multi_init();
-		
+
 		foreach ($players as &$p) {
 			if ($db) {
 				$q = mysql_query("SELECT `lastupdate`, `data_stats` FROM `" . db_table . "` WHERE `id` = '" . mysql_real_escape_string($p['id'], $db) . "' LIMIT 1", $db);
@@ -349,7 +411,7 @@
 						continue;
 				}
 			}
-			
+
 			$c = curl_init();
 			curl_setopt($c, CURLOPT_URL, sprintf(KFStats, $p['id']));
 			curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
@@ -357,13 +419,13 @@
 			curl_multi_add_handle($mc, $c);
 			$p['handle_stats'] = $c;
 		}
-		
+
 		$running = null;
 		do {
 			curl_multi_exec($mc, $running);
 			usleep(500);
 		} while ($running > 0);
-		
+
 		foreach ($players as &$p) {
 			$p['profile_private'] = false;
 			if (isset($p['handle_stats'])) {
@@ -378,7 +440,7 @@
 				curl_multi_remove_handle($mc, $p['handle_stats']);
 				unset($p['handle_stats']);
 			}
-			
+
 			$xml = simplexml_load_string($p['data_stats'], 'SimpleXMLElement', LIBXML_NOERROR | LIBXML_NOWARNING);
 			if (($xml instanceof SimpleXMLElement) && (count($xml) != 0)) {
 				if (isset($xml->achievements->item)) {
@@ -387,7 +449,8 @@
 					{
 						$map = getMap((string)$ach->description, (string)$ach->APIName);
 						$diff = getDifficulty((string)$ach->description);
-						
+						$longGame = getLongGame($map, (string)$ach->description);
+
 						if ($map && $diff) {
 							$p['achs'][$diff][$map] = (int)$ach->value == 1;
 							if ((int)$ach->value == 1)
@@ -406,14 +469,14 @@
 			unset($p['data_stats']);
 			getPlayerPerksLevels($p);
 		}
-		
+
 		curl_multi_close($mc);
-		
+
 		return $players;
 	}
-	
-	$playerlist = getAchievements($playerlist);
 
+	$playerlist = getAchievements($playerlist);
+	// var_dump($map_longgame);
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -493,7 +556,7 @@
 			#maps tr.map-row:hover td.achievement_locked {
 				background: #5c5c5c;
 			}
-			
+
 			#stats_container {
 				overflow: auto;
 				width: 1205px;
@@ -567,13 +630,19 @@
 			td.perk_container span.perk_red {
 				color: #fc4041;
 			}
-			
+
 			#stats_container div.selected, #stats_container div.stat:hover {
 				background-color: #151515;
 				color: #fff;
 				text-shadow: 0 1px 0 #000;
 			}
-			
+
+			.header {
+				background: #171717;
+				padding: 10px 20px;
+				margin: 25px 0 0 0;
+			}
+
 			.footer {
 				background: #171717;
 				padding: 10px 20px;
@@ -623,7 +692,7 @@
 							</tr>
 <?PHP	foreach($maplist as $m => $apinames) { ?>
 							<tr class="map-row">
-								<td><?=$m?></td>
+								<td><?=$m?><?=isLongGameStr($m)?></td>
 								<td class="invisible"/>
 <?PHP		foreach($playerlist as $p) {
 				foreach($difficultylist as $d) { ?>
@@ -646,7 +715,7 @@
 <?PHP		} ?>
 								</td>
 								<td class="invisible"/>
-<?PHP	} ?>					
+<?PHP	} ?>
 							</tr>
 							<tr style="border-top: 1px solid #777; height: 50px;">
 								<td class="invisible"><?=t('Other achievements')?></td>
@@ -728,7 +797,7 @@
 					),
 				),
 			),
-			'chart' => array(), 
+			'chart' => array(),
 		);
 		$charts = '';
 		$row = 1;
@@ -757,19 +826,19 @@
 		</center>
 		<script type="text/javascript">
 			<?=$charts?>
-			
+
 			google.load('visualization', '1', {packages:['corechart']});
-			
+
 			function showChart(id, data) {
 				$('#stats_container div').removeClass('selected');
 				$('#stats_container #stat_' + id.replace(/ /g, '_').toLowerCase()).addClass('selected');
 				data = JSON.parse(data);
 				var chart_data = google.visualization.arrayToDataTable(data['chart']);
 				var chart_opts = data['options'];
-				
+
 				chart.draw(chart_data, chart_opts);
 			}
-			
+
 			var chart;
 			$(window).load(function() {
 				chart = new google.visualization.ColumnChart(document.getElementById('chart_container'));
@@ -807,7 +876,13 @@
 					<li><?=t('No Data')?></li>
 				</ul>
 			</div>
-			<p><?=sprintf(t('Minimum interval between refreshes: %ds'), $cache_time)?></p>
+			<div class="box">
+				<h3><?=t('Last update')?>:</h3>
+				<?PHP echo date('Y-M-d H:i:s');?>
+				<p>
+				<?=sprintf(t('Minimum interval between refreshes: %ds'), $cache_time)?>
+				</p>
+			</div>
 			<p>&copy; 2012 <a href="http://luki.net.pl" target="_blank">Luki</a>, original layout by <a href="http://nyssa.me" target="_blank">PixelDuck</a> (a member of <a href="http://sykosis.co.uk" target="_blank">Sykosis</a> clan) modified by <a href="http://luki.net.pl" target="_blank">Luki</a></p>
 		</div>
 	</body>
