@@ -162,7 +162,8 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 		'demolitionspipebombkills'			=> array('visible_name' => 'Demolitions Pipebomb Kills', 'type' => 'demo'),
 		'enemiesgibbedwithm79'				=> array('visible_name' => 'Enemies Gibbed with M79', 'type' => 'demo'),
 
-		'zedsetfirewithtrenchonhillbilly'	=> array('visible_name' => 'Zeds Set On Fire With Trench (HillBilly)', 'type' => 'misc'),
+		// # this was removed from API
+		// 'zedsetfirewithtrenchonhillbilly'	=> array('visible_name' => 'Zeds Set On Fire With Trench (HillBilly)', 'type' => 'misc'),
 		'zedkilledduringhillbilly'			=> array('visible_name' => 'Zeds Killed During HillBilly', 'type' => 'misc'),
 		// 'stat46'							=> array('visible_name' => 'HillBilly Achievements Completed', 'type' => 'misc'),
 
