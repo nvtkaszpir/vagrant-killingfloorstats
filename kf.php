@@ -11,19 +11,42 @@
 	DEFINE('KFStats', 'http://steamcommunity.com/profiles/%s/statsfeed/1250/?schema=1');
 	
 	//MySQL Database (optional, used only for cache)
+	DEFINE('db_enabled', false);
 	DEFINE('db_host', 'DATABASE HOST');
 	DEFINE('db_user', 'DATABASE USER');
 	DEFINE('db_pass', 'DATABASE PASS');
 	DEFINE('db_name', 'DATABASE NAME');
 	DEFINE('db_table', 'kfstats_cache');
 	
-	DEFINE('FILES_PATH', './'); //relative path to additional files (jQuery + swf with chart)
+	DEFINE('FILES_PATH', ''); //relative path to additional files (jQuery + swf with chart)
 	DEFINE('CHART_WIDTH', 1000);
 	DEFINE('CHART_HEIGHT', 550);
 	
 	$playerlist = array(
 		//list of players' profiles (SteamID64 + display name)
-		array('id' => '7656119XXXXXXXXXX', 'name' => 'visible nick'),
+		array('id' => '76561197960302541', 'name' => '_KaszpiR_'),
+		//array('id' => '76561197990817411', 'name' => 'Azio'),
+		//array('id' => '76561197960804368', 'name' => 'dzony'),
+		//array('id' => '76561198000639694', 'name' => 'Drozdzers'),
+		//array('id' => '76561197996656102', 'name' => 'Garret'),
+		//array('id' => '76561197992296179', 'name' => 'Ghost'),
+		array('id' => '76561197993535598', 'name' => 'itsnotlupus'),
+		//array('id' => '76561198067389578', 'name' => 'Idas'),
+		//array('id' => '76561197995298791', 'name' => 'Jasiuuu'),
+		//array('id' => '76561197999916174', 'name' => 'Kenny'),
+		//array('id' => '76561198033119209', 'name' => 'Lambert'),
+		array('id' => '76561197990812049', 'name' => 'stranded'),
+		//array('id' => '76561197986850947', 'name' => 'Mhrok'),
+		//array('id' => '76561197998372064', 'name' => 'Olo'),
+		array('id' => '76561197966406409', 'name' => 'Ogoor'),
+		//array('id' => '76561197981773275', 'name' => 'omg'),
+		//array('id' => '76561197963250121', 'name' => 'Orfo'),
+		//array('id' => '76561198056332391', 'name' => 'Rocik'),
+		//array('id' => '76561198033388471', 'name' => 'w_patek'),
+		//array('id' => '76561198091474704', 'name' => 'Zagadkowa'),
+		array('id' => '76561197971302355', 'name' => 'MzK'),
+		array('id' => '76561197961622176', 'name' => 'Zuko'),
+		//array('id' => '76561197973995552', 'name' => 'ZuLislaw'),
 	);
 	
 	//List of maps in English achievements descriptions
@@ -34,11 +57,16 @@
 		'Bedlam'				=> array('winasylumnormal', 'winasylumhard', 'winasylumsuicidal', 'winasylumhell'),
 		'Biohazard'				=> false,
 		'Biotics Lab'			=> false,
+		'Clandestine'			=> array('winclandestinenormal', 'winclandestinehard', 'winclandestinesuicidal', 'winclandestinehell'),
 		'Crash'					=> false,
 		'Departed'				=> false,
 		'Farm'					=> false,
 		'Filth\'s Cross'		=> false,
 		'Foundry'				=> false,
+		'Forgotten'				=> false,
+		'Fright Yard'			=> array('winfrightyardnormal', 'winfrightyardhard', 'winfrightyardsuicidal', 'winfrightyardhell'),
+		'Fright Yard Objective'	=> array('winfrightyardobjnormal', 'winfrightyardobjhard', 'winfrightyardobjsuicidal', 'winfrightyardobjhell'),
+		'Hell'					=> array('winhellnormal', 'winhellhard', 'winhellsuicidal', 'winhellhell'),
 		'Hellride'				=> false,
 		'Hillbilly Horror'		=> false,
 		'Hospital Horrors'		=> false,
@@ -49,9 +77,14 @@
 		'Mountain Pass'			=> false,
 		'Offices'				=> false,
 		'Santa\'s Evil Lair'	=> false,
+		'Siren\'s Belch'		=> false,
 		'Suburbia'				=> false,
 		'Steamland'				=> array('winsteamlandnormal', 'winsteamlandhard', 'winsteamlandsuicidal', 'winsteamlandhell'),
 		'Steamland Objective'	=> array('winsteamlandobjnormal', 'winsteamlandobjhard', 'winsteamlandobjsuicidal', 'winsteamlandobjhell'),
+		'Stronghold'			=> false,
+		'Thrills Chills'		=> array('winthrillschillsnormal','winthrillschillshard','winthrillschillssuicidal','winthrillschillshell'),
+		'Transit'				=> array('wintransitnormal','wintransithard','wintransitsuicidal','wintransithell'),
+		'Transit Objective'		=> array('wintransitobjnormal','wintransitobjhard','wintransitobjsuicidal','wintransitobjhell'),
 		'Waterworks'			=> false,
 		'West London'			=> false,
 		'Wyre'					=> false,
@@ -62,7 +95,7 @@
 		'Normal',
 		'Hard',
 		'Suicidal',
-		'Hell on Earth',
+		'Hell',
 	);
 	
 	//Visible names and types (for icons) for stats
@@ -119,13 +152,13 @@
 		'zedskilledwhilezapped'				=> array('visible_name' => 'Zeds Killed While Zapped', 'type' => 'misc'),
 		
 		// 'testing1'						=> array('visible_name' => 'Stat XX', 'type' => 'misc'),
-		'medicprestige'						=> array('visible_name' => 'Medic Prestige', 'type' => 'medic'),
-		'supportprestige'					=> array('visible_name' => 'Support Prestige', 'type' => 'support'),
-		'sharpshooterprestige'				=> array('visible_name' => 'Sharpshooter Prestige', 'type' => 'sharp'),
-		'commandoprestige'					=> array('visible_name' => 'Commando Prestige', 'type' => 'commando'),
-		'berserkerprestige'					=> array('visible_name' => 'Berserker Prestige', 'type' => 'berserker'),
-		'firebugprestige'					=> array('visible_name' => 'Firebug Prestige', 'type' => 'firebug'),
-		'demoprestige'						=> array('visible_name' => 'Demo Prestige', 'type' => 'demo'),
+		//'medicprestige'						=> array('visible_name' => 'Medic Prestige', 'type' => 'medic'),
+		//'supportprestige'					=> array('visible_name' => 'Support Prestige', 'type' => 'support'),
+		//'sharpshooterprestige'				=> array('visible_name' => 'Sharpshooter Prestige', 'type' => 'sharp'),
+		//'commandoprestige'					=> array('visible_name' => 'Commando Prestige', 'type' => 'commando'),
+		//'berserkerprestige'					=> array('visible_name' => 'Berserker Prestige', 'type' => 'berserker'),
+		//'firebugprestige'					=> array('visible_name' => 'Firebug Prestige', 'type' => 'firebug'),
+		//'demoprestige'						=> array('visible_name' => 'Demo Prestige', 'type' => 'demo'),
 	);
 	
 	//List with in-game perks and requirements for promotion to a higher level
@@ -240,10 +273,10 @@
 	);
 	
 	//Count of other (non-maps) achievements
-	$other_count = 124;
+	$other_count = 141;
 	
 	//Only applicable when using MySQL database
-	$cache_time = 300; // 60 * 5 -> 5 minutes
+	$cache_time = 10; // 60 * 5 -> 5 minutes
 		
 //------ END OF CONFIGURATION ------\\
 	
@@ -299,7 +332,7 @@
 	function getAchievements($players) {
 		global $cache_time;
 		
-		$db = @mysql_connect(db_host, db_user, db_pass);
+		$db = db_enabled ? @mysql_connect(db_host, db_user, db_pass) : false;
 		if ($db)
 			mysql_select_db(db_name, $db);
 	
