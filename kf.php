@@ -604,7 +604,6 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 			#maps tr.map-row:hover td.achievement_locked {
 				background: #5c5c5c;
 			}
-
 			#stats_container {
 				overflow: auto;
 				width: 1205px;
@@ -685,10 +684,14 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 				text-shadow: 0 1px 0 #000;
 			}
 
-			.header {
+			#header {
+/*				padding: 10px 20px;
+*/				margin: 25px 0 0 0;
+			}
+			#header_container {
+				overflow: auto;
+				width: 1205px;
 				background: #171717;
-				padding: 10px 20px;
-				margin: 25px 0 0 0;
 			}
 
 			.footer {
@@ -726,6 +729,14 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 	</head>
 	<body>
 		<center>
+		<div class="content">
+			<div id="header">
+				<div id="header_container">
+					<b><?=t('Last update')?></b> <?PHP echo date('Y-M-d H:i:s');?>
+				</div>
+			</div>
+		</div>
+		<br/>
 			<div class="content">
 				<div id="maps">
 					<table>
@@ -858,9 +869,12 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 						</tbody>
 					</table>
 				</div>
+
+
 				<div id="stats">
 					<div id="chart_container">
 					</div>
+
 					<div id="stats_container">
 <?PHP	$chart_data = array(
 			'options' => array(
