@@ -53,7 +53,7 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 		//array('id' => '76561197995298791', 'name' => 'Jasiuuu'),
 		//array('id' => '76561197999916174', 'name' => 'Kenny'),
 		//array('id' => '76561198033119209', 'name' => 'Lambert'),
-		// array('id' => '76561197990812049', 'name' => 'stranded'),
+		array('id' => '76561197990812049', 'name' => 'stranded'),
 		//array('id' => '76561197986850947', 'name' => 'Mhrok'),
 		//array('id' => '76561197998372064', 'name' => 'Olo'),
 		array('id' => '76561197966406409', 'name' => 'Ogoor'),
