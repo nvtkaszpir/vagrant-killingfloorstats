@@ -694,6 +694,10 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 				background: #171717;
 			}
 
+			.nick {
+				text-align: center;
+			}
+
 			.footer {
 				background: #171717;
 				padding: 10px 20px;
@@ -751,7 +755,7 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 								<td class="invisible"/>
 <?PHP	foreach($playerlist as $p) { ?>
 										        <!-- difficulty + collectible column -->
-								<td colspan="<?=(count($difficultylist)+1)?>">
+								<td class="nick" colspan="<?=(count($difficultylist)+1)?>">
 									<a href="http://steamcommunity.com/profiles/<?=$p['id']?>/stats/KillingFloor" target="_blank"<?=($p['profile_private'] === true)?' style="color: #aaa"':''?>>
 										<?=$p['name']?>
 									</a>
