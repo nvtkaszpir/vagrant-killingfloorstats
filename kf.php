@@ -59,6 +59,7 @@ header('Cache-Control: max-age='.HTTP_CACHE.', public');
 		array('id' => '76561197966406409', 'name' => 'Ogoor'),
 		//array('id' => '76561197981773275', 'name' => 'omg'),
 		//array('id' => '76561197963250121', 'name' => 'Orfo'),
+		array('id' => '76561197962348944', 'name' => 'PhaTzMADe'),
 		//array('id' => '76561198056332391', 'name' => 'Rocik'),
 		//array('id' => '76561198033388471', 'name' => 'w_patek'),
 		//array('id' => '76561198091474704', 'name' => 'Zagadkowa'),
