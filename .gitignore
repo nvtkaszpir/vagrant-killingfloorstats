@@ -1,0 +1,7 @@
+/.vagrant
+/vagrant/puppet/.tmp
+/vagrant/puppet/Puppetfile.lock
+/vagrant/puppet/modules/*
+!/vagrant/puppet/modules/.gitkeep
+/vagrant/graphs/*
+!/vagrant/graphs/.gitkeep

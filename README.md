@@ -1,0 +1,127 @@
+About
+==================================================
+
+Example app from beginning to end, using Infrastructure as Code idea.
+
+
+Requirements
+==================================================
+
+* vagrant > 1.2.x - download and install https://www.vagrantup.com/
+* vagrant plugin librarian-puppet, install it using ``vagrant plugin install vagrant-librarian-puppet``
+* 2 CPU cores, 2GB of RAM, about 8GB of disk space max
+* rsync client
+* git client
+* access to the Internet without proxies (not supported in this setup via vagrant/bootstrap/puppet)
+
+
+Known limitation
+==================================================
+
+* try vagrant 1.9.x from official download page, cause system packages may have issues
+* you may need to adjust Vagrantfile depending on your vm provider and rsync options
+* centos 7.3 as base vagrant box - tested with qemu/kvm, virtualbox
+* monit as simple monitoring, it provides web interface (see below)
+* monit does not send any notifications in this setup.
+* configuration management using puppet 3.8.7 - a bit ancient nowadays...
+
+
+Directory structure
+==================================================
+
+* ``src/`` - app code
+* ``vagrant/`` - provisioning vagrant virtual machines code - bootstrap scripts and puppet
+* ``test/`` - and especially .jmx file - for performance testing, see below
+
+Starting up
+==================================================
+
+To start from scratch
+
+```bash
+
+vagrant plugin install vagrant-librarian-puppet
+vagrant up app
+```
+
+and virtual machine should be created.
+
+The following addresses are then available:
+
+* http://127.0.0.1:8183/KillingFloorStats/ for app interface
+* http://127.0.0.1:12812/ for monitoring app interface (admin:somepassword)
+* http://127.0.0.1:19090/ for general server status (vagrant:vagrant)
+
+Inside VM
+==================================================
+
+See in vm named ``app``:
+
+* ``/var/log/monit`` - monit logs which checks service status
+
+* ``/var/log/nginx/access.log`` - web server logs
+* ``/var/log/nginx/error.log`` - web server logs
+* ``/var/log/php-fpm/error.log`` - web for app errors log
+* ``/var/log/php-fpm/www-slow.log`` - PHP slow log
+
+* ``/var/log/nginx/kfstats.hlds.pl.access.log`` - specific logs for the app
+* ``/var/log/nginx/kfstats.hlds.pl.error.log`` - specific logs for the app
+
+Rebuilding Vagrant vm
+==================================================
+
+In order to re-provision modified puppet code you may need to run below commands, sometimes twice:
+
+```bash
+vagrant rsync app
+vagrant provision app --provider=puppet
+```
+
+This is due the fact, that librarian-puppet plugin for vagrant runs after rsync and does not send
+files to hosts...
+
+Tuning
+==================================================
+
+Vagrant VM tune
+--------------------------------------------------
+
+See header of the Vagrantfile to adjust number of CPU cores and memory.
+
+Vagrant with custom provider
+--------------------------------------------------
+
+Instead of VirtualBox you can use qemu/KVM with libvirt:
+
+```bash
+vagrant up app --provider=libvirt
+```
+
+For LXC you should see for example https://app.vagrantup.com/frensjan/boxes/centos-7-64-lxc or custom image,
+but notice that then port forwarding may not work - find out container IP and use direct app ports, in Puppet/hiera.
+
+
+Puppet tuning
+--------------------------------------------------
+
+* Puppetfile - used to manage puppet modules.
+See ``vagrant/puppet/Puppetfile``, in case of problems like ``Could not resolve the dependencies.`` try on your machine:
+
+```bash
+gem instal librarian-puppet
+cd vagrant/puppet/Puppetfile
+librarian-puppet clean
+librarian-puppet install --verbose
+```
+
+* See ``vagrant/puppet/`` for the configuration setting using Puppet.
+See especially``vagrant/puppet/hieradata/roles/app.yaml`` for app server tweaks like php settings, nginx and so on
+
+
+Testing
+==================================================
+
+In ``test/`` you have various test suites:
+
+* ``integration/inspec`` - for testing vm after provisioning
+* ``benchmarks/`` - performance test in jmeter 3.1 (requires some jmeter plugins like 3 Basic Graps, 5 Additional Graphs, Custom Thread Groups, Composite timeline graph)
