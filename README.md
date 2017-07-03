@@ -125,3 +125,16 @@ In ``test/`` you have various test suites:
 
 * ``integration/inspec`` - for testing vm after provisioning
 * ``benchmarks/`` - performance test in jmeter 3.1 (requires some jmeter plugins like 3 Basic Graps, 5 Additional Graphs, Custom Thread Groups, Composite timeline graph)
+
+
+Benchmark test
+--------------------------------------------------
+
+Install jmeter 3.1 and plugins using Plugins Manager.
+Load test file from ``test/benchmark/stress.jmx`` and adjust default testing parameters for HTTP request, like IP and port.
+
+In the future this could be expanded so that jmeter would take that data from env vars.
+
+
+
+

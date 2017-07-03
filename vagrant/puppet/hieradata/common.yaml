@@ -1,0 +1,15 @@
+---
+ntp::package_ensure: latest
+ntp::enable: true
+ntp::service_manage: true
+ntp::service_ensure: running
+
+# this is centos 7 specific, may need to move it to os section later
+php::globals::fpm_pid_file: '/run/php-fpm/php-fpm.pid'
+php::config::fpm_pid_file: '/run/php-fpm/php-fpm.pid'
+php::settings:
+  'Date/date.timezone': 'UTC'
+
+nginx::pid: '/run/nginx.pid'
+nginx::config::pid: '/run/nginx.pid'
+

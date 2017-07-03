@@ -1,0 +1,40 @@
+forge "https://forgeapi.puppetlabs.com"
+
+# global puppet modules
+mod "puppetlabs/stdlib"
+
+# ntp service
+mod "puppetlabs/ntp", '3.3.0'
+
+# nginx, web server
+mod "puppet/nginx", "0.6.0"
+
+# simple monitoring and alerting service
+mod 'sbitio-monit', '1.0.0'
+# server status via web, requied for monit due to self-signed cert
+mod 'petems-cockpit', '1.0.0'
+
+
+# centos EPEL repos
+mod 'stahnma-epel', '1.2.2'
+# centos selinux
+mod 'puppet-selinux', '0.8.0'
+
+# PHP 5.6 under centos
+mod 'voxpupuli/php',
+  :git => 'https://github.com/voxpupuli/puppet-php.git',
+  :ref => 'de2e0c66da08fb1cd7a6a0f0ff860f95e205999c'
+
+# graphite, broken due to module dependency hell
+# # workaround for example42-yum dependency
+# this is not ported to puppet3 branch yet
+# mod 'voxpupuli/php',
+#   :git => 'https://github.com/yastupin/puppet-php.git',
+#   :ref => 'c4f0d21de4a91752a7c2dc9ddafd8ce51055b703'
+
+# cannot use it because of conflicts with voxpopuli-puppet
+# mod 'maestrodev-wget', '1.7.3'
+# mod 'puppet-collectd', '5.3.0'
+# mod 'dwerder-graphite',
+#   :git => 'https://github.com/echocat/puppet-graphite.git',
+#   :ref => 'develop'

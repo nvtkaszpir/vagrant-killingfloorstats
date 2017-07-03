@@ -1,0 +1,164 @@
+---
+profile::app::domain: kfstats.hlds.pl #official domain for the app
+profile::app::dir: /srv/app # directory where app is deployed
+# this still requires http://<ipaddr>/SomeDirectroy/ request
+
+
+# app server
+php::manage_repos: true
+php::dev: false
+php::composer: false
+php::phpunit: false
+
+php::fpm::config::emergency_restart_threshold: '60'
+php::fpm::config::emergency_restart_interval: '10'
+php::fpm::config::process_control_timeout: '60'
+
+php::fpm::pools:
+  'www':
+    pm: dynamic
+    pm_start_servers: '1'
+    pm_min_spare_servers: '1'
+    pm_max_spare_servers: '2'
+    pm_max_requests: '5000'
+    request_terminate_timeout: '60'
+    request_slowlog_timeout: '5'
+    pm_status_path: '/php-status'
+    ping_path: '/php-ping'
+
+# web server
+nginx::confd_purge: true
+nginx::server_purge: true
+
+# also defines location /
+nginx::nginx_servers:
+  "%{hiera('profile::app::domain')}":
+    ensure: present
+    use_default_location: false # disables creation of location / ( but then allows to create root /profile::app::dir in server scope)
+    server_name:
+      - '_' #default vhost
+      # - "%{hiera('profile::app::domain')}"
+    rewrite_www_to_non_www: false
+    www_root: "%{hiera('profile::app::dir')}"
+    try_files:
+      - '$uri'
+      - '$uri/'
+      - '=404'
+    index_files:
+      - 'kf.php' # override index.php to our custom script
+
+nginx::nginx_locations:
+  '00-server-status':
+    ensure: present
+    server: "%{hiera('profile::app::domain')}"
+    location: /server-status
+    stub_status: true
+    location_cfg_append:
+      access_log: 'off'
+      allow: 127.0.0.1
+      deny: all
+
+  '00-php-status':
+    ensure: present
+    server: "%{hiera('profile::app::domain')}"
+    www_root: "%{hiera('profile::app::dir')}"
+    location: '~ /(php-status|php-ping)$'
+    location_cfg_append:
+      access_log: 'off'
+      allow: 127.0.0.1
+      deny: all
+      fastcgi_pass: 'php_upstream'
+      include: 'fastcgi_params'
+      fastcgi_param SCRIPT_FILENAME: '$document_root/$fastcgi_script_name'
+
+  '01-php':
+    ensure: present
+    server: "%{hiera('profile::app::domain')}"
+    location: '~ .php$'
+    # www_root: "%{hiera('profile::app::dir')}"
+    try_files:
+      - '$uri'
+      - '$uri/'
+      - '=404'
+    location_cfg_append:
+      fastcgi_split_path_info: '^(.+\.php)(.*)$'
+      fastcgi_param SCRIPT_FILENAME: '$document_root/$fastcgi_script_name'
+      fastcgi_pass: 'php_upstream'
+      fastcgi_index: 'kf.php'
+      include: 'fastcgi_params'
+      fastcgi_intercept_errors: 'on'
+      fastcgi_ignore_client_abort: 'off'
+      fastcgi_connect_timeout: '30'
+      fastcgi_send_timeout: '10'
+      fastcgi_read_timeout: '10'
+      fastcgi_buffer_size: '128k'
+      fastcgi_buffers: '4 256k'
+      fastcgi_busy_buffers_size: '256k'
+      fastcgi_temp_file_write_size: '256k'
+
+nginx::nginx_upstreams:
+  'php_upstream':
+    ensure: present
+    members:
+      - 127.0.0.1:9000
+
+# monitoring
+
+# Main monitrc configuration options.
+monit::conf_file    : '/etc/monitrc' # centos7
+monit::check_interval    : '10'
+monit::check_start_delay : '10'
+# monit::mailserver        : 'localhost'
+monit::eventqueue        : true
+# monit::alerts            :
+#   - 'kaszpir@gmail.com'
+# # - 'kaszpir@gmail.com only on { timeout, nonexist }'
+monit::httpserver        : true
+monit::httpserver_ssl: true
+monit::httpserver_pemfile: '/etc/cockpit/ws-certs.d/0-self-signed.cert' # this means we require cockpit :D
+monit::httpserver_bind_address: '0.0.0.0' # null value
+monit::httpserver_allow:
+  - 'localhost'
+  - '10.0.0.0/8'
+monit::httpserver_allow  :
+  - 'admin:somepassword'
+# Tweak system check.
+monit::system_fs         : ['/']
+# Add some checks.
+monit::checks:
+  php5-fpm :
+    type: 'process'
+    config:
+      pidfile       : "%{hiera('php::globals::fpm_pid_file')}"
+      program_start : '/usr/bin/systemctl start php-fpm'
+      program_stop  : '/usr/bin/systemctl stop php-fpm'
+    tests  :
+      - type          : 'connection'
+        host          : '127.0.0.1'
+        port          : '9000'
+        socket_type   : 'TCP'
+        protocol      : 'GENERIC'
+        protocol_test :
+          - send   : '"\0x01\0x09\0x00\0x00\0x00\0x00\0x08\0x00\0x00\0x00\0x00\0x00\0x00\0x00\0x00\0x00"'
+            expect : '"\0x01\0x0A"'
+        action   : 'restart'
+      - type      : 'total cpu'
+        operator  : '>'
+        value     : '50%'
+        tolerance :
+          cycles  : '2'
+      - type      : 'children'
+        operator  : '>'
+        value     : '40'
+
+  nginx:
+    type   : 'service'
+    config :
+      pidfile : "%{hiera('nginx::pid')}"
+    tests  :
+      - type: 'connection'
+        host: '127.0.0.1'
+        port: '80'
+        protocol: 'http'
+        protocol_test:
+          request: '/server-status'

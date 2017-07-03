@@ -1,0 +1,12 @@
+---
+:backends:
+  - yaml
+
+:yaml:
+  :datadir: /vagrant/puppet/hieradata
+
+:hierarchy:
+  - 'roles/%{::role}'
+  - 'virtual/%{::virtual}'
+  - common
+
