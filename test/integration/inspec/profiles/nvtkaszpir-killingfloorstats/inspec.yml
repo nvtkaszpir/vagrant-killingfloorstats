@@ -1,0 +1,15 @@
+name: nvtkaszpir-killingfloorstats
+title: InSpec Profile for KillingFloorStats PHP script
+maintainer: Michał Sochoń
+copyright: Michał Sochoń
+copyright_email: kaszpir@gmail.com
+license: Apache-2.0
+summary: profile for web app with nginx/php
+version: 1.0.0
+supports:
+  - os-family: unix
+depends:
+  - name: nvtkaszpir-nginx
+    path: ../../nvtkaszpir-nginx
+  - name: nvtkaszpir-php-fpm
+    path: ../../nvtkaszpir-php-fpm

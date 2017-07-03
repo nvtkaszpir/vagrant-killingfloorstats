@@ -1,0 +1,26 @@
+# run `bundle install` to install packages
+# in case of issues try `gem pristine --all`
+
+source 'https://rubygems.org'
+
+gem 'bundler'
+gem 'busser'
+gem 'inspec'
+gem 'iconv'
+gem 'kitchen-ansiblepush'
+gem 'kitchen-ec2'
+gem 'kitchen-inspec'
+gem 'kitchen-lxc'
+gem 'kitchen-puppet', '>=1.44.2'
+gem 'kitchen-ssh'
+gem 'kitchen-sshgzip'
+gem 'kitchen-sync'
+gem 'kitchen-transport-rsync'
+gem 'kitchen-transport-sshtar'
+gem 'kitchen-vagrant'
+gem 'librarian-puppet'
+gem 'puppet', '3.8.7'
+gem 'puppet-lint'
+gem 'test-kitchen'
+gem 'vagrant-lxc' # requires 'vagrant plugin install vagrant-lxc; vagrant lxc sudoers'
+gem 'vagrant-wrapper'

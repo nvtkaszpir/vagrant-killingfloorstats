@@ -1,0 +1,10 @@
+name: nvtkaszpir-php-fpm
+title: InSpec Profile
+maintainer: Michał Sochoń
+copyright: Michał Sochoń
+copyright_email: kaszpir@gmail.com
+license: Apache-2.0
+summary: An InSpec Profile for php-fpm service under Centos 7.3
+version: 0.1.0
+supports:
+  - platform: linux

@@ -7,13 +7,16 @@ Example app from beginning to end, using Infrastructure as Code idea.
 Requirements
 ==================================================
 
+Your local machine should have the following:
+
+* 2 CPU cores, 2GB of RAM, about 8GB of disk space required for vm
 * vagrant > 1.2.x - download and install https://www.vagrantup.com/
 * vagrant plugin librarian-puppet, install it using ``vagrant plugin install vagrant-librarian-puppet``
-* 2 CPU cores, 2GB of RAM, about 8GB of disk space max
 * rsync client
-* git client
+* git client - for librarian-puppet
 * access to the Internet without proxies (not supported in this setup via vagrant/bootstrap/puppet)
-
+* jmeter 3.1 with plugin manager and plugins for benchmark tests
+* ruby 2.x.x and bundler for running more advanced tests
 
 Known limitation
 ==================================================
@@ -42,6 +45,7 @@ To start from scratch
 
 vagrant plugin install vagrant-librarian-puppet
 vagrant up app
+
 ```
 
 and virtual machine should be created.
@@ -135,6 +139,24 @@ Load test file from ``test/benchmark/stress.jmx`` and adjust default testing par
 
 In the future this could be expanded so that jmeter would take that data from env vars.
 
+TODO: add exact info about jmeter plugins
 
 
+Inspec test
+--------------------------------------------------
 
+Example running integration tests with inspec against vagrant:
+
+```bash
+inspec exec test/integration/inspec/nvtkaszpir-nginx -t ssh://127.0.0.1:2222 --user=vagrant --key-files=.vagrant/machines/app/virtualbox/private_key --sudo --profiles-path=test/integration/inspec/
+
+```
+
+You may need to adjust ssh:// and --key-files to suit your vagrant provider.
+
+Example running integration tests with inspec against normal server:
+
+```bash
+inspec exec test/integration/inspec/nvtkaszpir-nginx -t ssh://some-user@some-host.tld --user=vagrant --key-files=/home/kaszpir/.ssh/id_rsa --sudo --profiles-path=test/integration/inspec/
+
+```

@@ -1,0 +1,11 @@
+---
+lockfile_version: 1
+depends:
+- name: nvtkaszpir-nginx
+  resolved_source:
+    path: "/home/kaszpir/src/jobs/4finacne/test/integration/inspec/nvtkaszpir-nginx"
+  version_constraints: ">= 0"
+- name: nvtkaszpir-php-fpm
+  resolved_source:
+    path: "/home/kaszpir/src/jobs/4finacne/test/integration/inspec/nvtkaszpir-php-fpm"
+  version_constraints: ">= 0"
