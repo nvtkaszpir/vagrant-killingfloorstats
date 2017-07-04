@@ -115,7 +115,7 @@ monit::eventqueue        : true
 # # - 'kaszpir@gmail.com only on { timeout, nonexist }'
 monit::httpserver        : true
 monit::httpserver_ssl: true
-monit::httpserver_pemfile: '/etc/cockpit/ws-certs.d/0-self-signed.cert' # this means we require cockpit :D
+monit::httpserver_pemfile: '/etc/ssl/monit.pem' # this means we require cockpit :D
 monit::httpserver_bind_address: '0.0.0.0' # null value
 monit::httpserver_allow:
   - 'localhost'

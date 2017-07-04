@@ -27,7 +27,8 @@ Known limitation
 * monit as simple monitoring, it provides web interface (see below)
 * monit does not send any notifications in this setup.
 * configuration management using puppet 3.8.7 - a bit ancient nowadays...
-
+* cockpit does not start on first puppet run (because it generates cert on first start), so exec puppet twice
+  also, looks like puppet always restarts cockpit on its run...
 
 Directory structure
 ==================================================

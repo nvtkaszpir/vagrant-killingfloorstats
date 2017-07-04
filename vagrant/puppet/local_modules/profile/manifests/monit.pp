@@ -1,19 +1,16 @@
-
-class profile::monit {
+# cert should be a contents of the certificate
+class profile::monit (
+  $cert
+) {
 
   include ::monit
 
-
-  # ok, this is pretty lame, we use cockpit to generate self-signed cert
-  # to be later used in monit :)
-  include ::cockpit
-
   # make sure self-signed cert permissions are properly set
-  file {'/etc/cockpit/ws-certs.d/0-self-signed.cert':
+  file {'/etc/ssl/monit.pem':
     ensure  => present,
     mode    => '0600',
-    require => Class['::cockpit'],
     before  => Class['::monit'],
+    content => $cert,
   }
 
 }
