@@ -47,9 +47,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # LXC under linux
-  config.vm.provider :lxc do |lxc|
-   lxc.customize 'cgroup.cpuset.cpus', '0,1'  # two cores
-   lxc.customize 'cgroup.memory.limit_in_bytes', "#{V_MEM_TOTAL}M"
+  config.vm.provider :lxc do |l, override|
+    override.vm.box = "st01tkh/centos7-64-lxc"
   end
 
   # QEMU/KVM under linux
@@ -96,6 +95,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.vm.provider :lxc do |lxc|
       lxc.customize "network.hwaddr", "00:16:3e:33:44:49"
       lxc.container_name = :machine
+      lxc.customize "aa_allow_incomplete", "1"
+      lxc.customize "cgroup.cpuset.cpus", "0,1"  # two cores
+      lxc.customize "cgroup.memory.limit_in_bytes", "#{V_MEM_TOTAL}M"
     end
 
     # libvirt overrides, same hostname
