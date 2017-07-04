@@ -28,7 +28,7 @@ Known limitation
 * monit does not send any notifications in this setup.
 * configuration management using puppet 3.8.7 - a bit ancient nowadays...
 * cockpit does not start on first puppet run (because it generates cert on first start), so exec puppet twice
-  also, looks like puppet always restarts cockpit on its run...
+* cockpit is shut down as service by sytemd after some time, triggering connection on port 9090 launches it again
 
 Directory structure
 ==================================================
@@ -180,3 +180,7 @@ Example running integration tests with inspec against normal server:
 inspec exec test/integration/inspec/profiles/nvtkaszpir-killingfloorstats -t ssh://some-user@some-host.tld --user=vagrant --key-files=/home/kaszpir/.ssh/id_rsa --sudo --profiles-path=test/integration/inspec/
 
 ```
+
+
+Notice that cockpit service can be down if not used for few mintues,
+it is automatically spawned by systemd on port 9090 activity.
