@@ -53,7 +53,7 @@ and virtual machine should be created.
 The following addresses are then available:
 
 * http://127.0.0.1:8183/KillingFloorStats/ for app interface
-* http://127.0.0.1:12812/ for monitoring app interface (admin:somepassword)
+* https://127.0.0.1:12812/ for monitoring app interface (admin:somepassword)
 * http://127.0.0.1:19090/ for general server status (vagrant:vagrant)
 
 Inside VM

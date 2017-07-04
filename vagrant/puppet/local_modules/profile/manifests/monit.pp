@@ -12,7 +12,7 @@ class profile::monit {
   file {'/etc/cockpit/ws-certs.d/0-self-signed.cert':
     ensure  => present,
     mode    => '0600',
-    require => Class['::cockpit::install'],
+    require => Class['::cockpit'],
     before  => Class['::monit::service'],
   }
 
