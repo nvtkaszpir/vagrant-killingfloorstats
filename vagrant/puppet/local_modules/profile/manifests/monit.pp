@@ -13,7 +13,7 @@ class profile::monit {
     ensure  => present,
     mode    => '0600',
     require => Class['::cockpit'],
-    before  => Class['::monit::service'],
+    before  => Class['::monit'],
   }
 
 }
