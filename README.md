@@ -171,6 +171,8 @@ For example I use libvirt provider, so I use below command:
 inspec exec test/integration/inspec/profiles/nvtkaszpir-killingfloorstats -t ssh://192.168.121.224 --user=vagrant --key-files=.vagrant/machines/app/libvirt/private_key --sudo --profiles-path=test/integration/inspec/
 ```
 
+See ``vagrant ssh-config`` for more details.
+
 Inspec test - remote host
 --------------------------------------------------
 
