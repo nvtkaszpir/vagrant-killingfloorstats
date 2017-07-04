@@ -14,6 +14,7 @@ Your local machine should have the following:
 * vagrant plugin librarian-puppet, install it using ``vagrant plugin install vagrant-librarian-puppet``
 * rsync client
 * git client - for librarian-puppet
+* puppet package
 * access to the Internet without proxies (not supported in this setup via vagrant/bootstrap/puppet)
 * jmeter 3.1 with plugin manager and plugins for benchmark tests
 * ruby 2.x.x and bundler for running more advanced tests
@@ -21,6 +22,7 @@ Your local machine should have the following:
 Known limitation
 ==================================================
 
+* don't try to use it under Windows platform, there is too much dependency to ruby not to support it here. (TODO: get rid of vagrant plugin, move all into vm: rvm + gem + librarian-puppet, adjust provisioning scripts) - so right now you can create vm to create vm... :)
 * try vagrant 1.9.x from official download page, cause system packages may have issues
 * you may need to adjust Vagrantfile depending on your vm provider and rsync options
 * centos 7.3 as base vagrant box - tested with qemu/kvm, virtualbox
