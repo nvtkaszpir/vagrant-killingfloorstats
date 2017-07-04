@@ -11,13 +11,10 @@ Your local machine should have the following:
 
 * 2 CPU cores, 2GB of RAM, about 8GB of disk space required for vm
 * vagrant > 1.2.x - download and install https://www.vagrantup.com/
-* vagrant plugin librarian-puppet, install it using ``vagrant plugin install vagrant-librarian-puppet``
 * rsync client
-* git client - for librarian-puppet
-* puppet package
 * access to the Internet without proxies (not supported in this setup via vagrant/bootstrap/puppet)
 * jmeter 3.1 with plugin manager and plugins for benchmark tests
-* ruby 2.x.x and bundler for running more advanced tests
+* ruby 2.x.x and bundler for running more advanced tests (inspec)
 
 Known limitation
 ==================================================
@@ -46,7 +43,6 @@ To start from scratch
 
 ```bash
 
-vagrant plugin install vagrant-librarian-puppet
 vagrant up app
 
 ```
@@ -81,7 +77,7 @@ In order to re-provision modified puppet code you may need to run below commands
 
 ```bash
 vagrant rsync app
-vagrant provision app --provider=puppet
+vagrant provision app
 ```
 
 This is due the fact, that librarian-puppet plugin for vagrant runs after rsync and does not send
@@ -111,7 +107,7 @@ but notice that then port forwarding may not work - find out container IP and us
 Puppet tuning
 --------------------------------------------------
 
-* Puppetfile - used to manage puppet modules.
+* Puppetfile - used to manage puppet modules. It will be updated during provision but is not rsynced back to your host.
 See ``vagrant/puppet/Puppetfile``, in case of problems like ``Could not resolve the dependencies.`` try on your machine:
 
 ```bash
@@ -148,12 +144,24 @@ TODO: add exact info about jmeter plugins
 Inspec test - checking dependencies
 --------------------------------------------------
 
-Example running integration tests with inspec against vagrant.
+Example running integration tests with inspec against vagrant. Notice, that it requires ruby on local machine.
 
-First, you must resolve inspec vendors (and refresh .lock files):
+Before running inspec, update ruby using rvm and gems, short version:
 
 ```bash
-inspec vendor test/integration/inspec/profiles/nvtkaszpir-killingfloorstats/
+gpg2 --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+\curl -sSL https://get.rvm.io | bash -s stable
+source ~/.rvm/scripts/rvm
+rvm install 2.4
+rvm use 2.4
+gem install bundler
+bundle install
+```
+
+After that, you must resolve inspec vendors (and refresh .lock files):
+
+```bash
+inspec vendor test/integration/inspec/profiles/nvtkaszpir-killingfloorstats/ --overwrite
 ```
 
 Inspec test - vagrant

@@ -6,10 +6,6 @@ V_MEM = 512 # in megabytes per core
 V_MEM_TOTAL = V_MEM * V_CPU
 SYNC_TYPE = "rsync" # how to sync files in vagrant, for lxc rsync is suggested
 
-unless Vagrant.has_plugin?("vagrant-librarian-puppet")
-  raise 'vagrant-librarian-puppet is not installed! Please install it via "vagrant plugin install vagrant-librarian-puppet".'
-end
-
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
@@ -29,9 +25,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # application ports
   # puppet stuff and provisioning
   config.vm.synced_folder "./vagrant", "/vagrant",
+    id: "vagrant",
     type: SYNC_TYPE,
     # rsync__verbose: true,
     rsync__exclude: [".git/", "puppet/.tmp/"]
+
+  config.vm.synced_folder "./test", "/tmp/test",
+    id: "test",
+    type: SYNC_TYPE,
+    rsync__exclude: ".git/"
 
 
   #########################################################################
@@ -73,20 +75,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provision 'shell', :path => 'vagrant/bootstrap.sh'
 
-  # The librarian-puppet plugin works in this dir.
-  config.librarian_puppet.puppetfile_dir = "vagrant/puppet"
-  config.librarian_puppet.placeholder_filename = ".gitkeep"
-  # The librarian-puppet module installs all 3rd party modules to puppet/modules
-  # We develop our modules in puppet/local_modules
-
-  # notice, below we define puppet settings per vm, and just facter section differs
-
   #########################################################################
   # VM definitions
   #########################################################################
 
 
   config.vm.define :app do |v|
+
+    # expand synced folders with our app
+    v.vm.synced_folder "./src", "/srv/app",
+      id: "app",
+      type: SYNC_TYPE,
+      rsync__exclude: ".git/"
 
     v.vm.network "forwarded_port", guest: 80, host: 8183
     v.vm.network "forwarded_port", guest: 2812, host: 12812
@@ -103,79 +103,34 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       override.vm.hostname = "app"
     end
 
-    v.vm.provision "shell", inline: <<-SHELL
-      mkdir -p /etc/facter/facts.d/
-      echo "role=app" > /etc/facter/facts.d/vagrant.txt
-    SHELL
-
-    v.vm.provision "puppet" do |puppet|
-      puppet.manifest_file      = "app.pp"
-      puppet.facter = {
-        "vagrant" => 1,
-        "role"    => "app"
-      }
-      puppet.synced_folder_type = SYNC_TYPE
-      puppet.manifests_path     = "vagrant/puppet/manifests"
-      puppet.module_path        = ["vagrant/puppet/modules", "vagrant/puppet/local_modules"]
-      puppet.hiera_config_path  = "vagrant/puppet/hiera.yaml"
-      puppet.working_directory  = "/tmp/vagrant-puppet"
-      puppet.options = [
-        '--graph',
-        '--graphdir /vagrant/graphs',
-        '--verbose',
-        # '--debug',
+    v.vm.provision "shell",
+      path: "vagrant/facter.sh",
+      preserve_order: true,
+      args: [
+        "role=#{:app}",
+        "vagrant=1",
       ]
 
+    v.vm.provision "shell",
+      path: "vagrant/librarian-puppet.sh",
+      preserve_order: true,
+      args: ['/vagrant/puppet']
 
-    end
+    v.vm.provision "shell",
+      path: "vagrant/puppet-apply.sh",
+      preserve_order: true,
+      env: {
+        PUPPET_OPTS: "--graph --graphdir /vagrant/graphs",
+        PUPPET_MANIFEST: "#{:app}.pp",
+        PUPPET_MODULE_PATH: '/vagrant/puppet/modules:/vagrant/puppet/local_modules',
+        PUPPET_DIR: '/vagrant/puppet',
+        PUPPET_VERBOSE: "1",
+      }
 
-    # expand synced folders with our app
-    v.vm.synced_folder "./src", "/srv/app",
-      type: SYNC_TYPE,
-      rsync__exclude: ".git/"
+    v.vm.provision "shell",
+      path: "vagrant/info.sh",
+      preserve_order: true
 
   end
-
-
-  # config.vm.define :monitoring do |v|
-  #
-  #   v.vm.network "forwarded_port", guest: 80, host: 8184
-  #
-  #   v.vm.provider :lxc do |lxc|
-  #     lxc.customize "network.hwaddr", "00:16:3e:33:44:50"
-  #     lxc.container_name = :machine
-  #   end
-  #
-  #   v.vm.provision "puppet" do |puppet|
-  #     puppet.manifest_file      = "monitoring.pp"
-  #     puppet.facter = {
-  #       "vagrant" => 1,
-  #       "role" => "monitoring",
-  #     }
-  #     puppet.synced_folder_type = SYNC_TYPE
-  #     puppet.manifests_path     = "vagrant/puppet/manifests"
-  #     puppet.module_path        = ["vagrant/puppet/modules", "vagrant/puppet/local_modules"]
-  #     puppet.hiera_config_path  = "vagrant/puppet/hiera.yaml"
-  #     puppet.working_directory  = "/tmp/vagrant-puppet"
-  #     puppet.options = [
-  #       '--graph',
-  #       '--graphdir /vagrant/graphs',
-  #       '--verbose',
-  #       # '--debug',
-  #     ]
-  #
-  #
-  #   end
-  #
-  # end
-
-  config.vm.provision "shell", inline: <<-IPINFO
-    echo ========================================================================
-    ipconfig | grep inet
-    ip addr  | grep inet
-    hostname -I
-    echo ========================================================================
-  IPINFO
-
 
 end
