@@ -142,21 +142,40 @@ In the future this could be expanded so that jmeter would take that data from en
 TODO: add exact info about jmeter plugins
 
 
-Inspec test
+Inspec test - checking dependencies
 --------------------------------------------------
 
-Example running integration tests with inspec against vagrant:
+Example running integration tests with inspec against vagrant.
+
+First, you must resolve inspec vendors (and refresh .lock files):
 
 ```bash
-inspec exec test/integration/inspec/nvtkaszpir-nginx -t ssh://127.0.0.1:2222 --user=vagrant --key-files=.vagrant/machines/app/virtualbox/private_key --sudo --profiles-path=test/integration/inspec/
+inspec vendor test/integration/inspec/profiles/nvtkaszpir-killingfloorstats/
+```
+
+Inspec test - vagrant
+--------------------------------------------------
+
+After resolving inspec vendor dependencies you can execute tests on vagrant box:
+
+```bash
+inspec exec test/integration/inspec/profiles/nvtkaszpir-killingfloorstats -t ssh://127.0.0.1:2222 --user=vagrant --key-files=.vagrant/machines/app/virtualbox/private_key --sudo --profiles-path=test/integration/inspec/
 
 ```
 
-You may need to adjust ssh:// and --key-files to suit your vagrant provider.
+If you use custom provider for vagrant, then you may need to adjust ssh:// and --key-files to suit your setup.
+For example I use libvirt provider, so I use below command:
+
+```bash
+inspec exec test/integration/inspec/profiles/nvtkaszpir-killingfloorstats -t ssh://192.168.121.224 --user=vagrant --key-files=.vagrant/machines/app/libvirt/private_key --sudo --profiles-path=test/integration/inspec/
+```
+
+Inspec test - remote host
+--------------------------------------------------
 
 Example running integration tests with inspec against normal server:
 
 ```bash
-inspec exec test/integration/inspec/nvtkaszpir-nginx -t ssh://some-user@some-host.tld --user=vagrant --key-files=/home/kaszpir/.ssh/id_rsa --sudo --profiles-path=test/integration/inspec/
+inspec exec test/integration/inspec/profiles/nvtkaszpir-killingfloorstats -t ssh://some-user@some-host.tld --user=vagrant --key-files=/home/kaszpir/.ssh/id_rsa --sudo --profiles-path=test/integration/inspec/
 
 ```
