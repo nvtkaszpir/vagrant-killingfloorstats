@@ -7,37 +7,41 @@ echo "========================================================================"
 echo "Starting bootstrap."
 if [ -f "/etc/redhat-release" ];then
 	echo "Redhat or something...."
-
+	RELEASEVER=$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))
 	yum clean all
 	# we will need that to lock puppet version
-	yum install -y yum-versionlock
-	# required for ruby-json
-	yum install -y epel-release wget
+	yum install -y yum-versionlock epel-release wget mc
 	# install key from puppetabs
 	# install puppetlabs repo
-	wget -q https://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs -O /tmp/RPM-GPG-KEY-puppetlabs
-	rpm --import /tmp/RPM-GPG-KEY-puppetlabs
-	rpm -ivh https://yum.puppetlabs.com/puppetlabs-release-el-7.noarch.rpm
-
-	echo "Installing puppet ${puppet_version_yum}"
-	yum install -y ${puppet_version_yum} mc >> /tmp/provision.shell.log 2>&1
-	yum versionlock puppet
+	yum list installed ${puppet_version_yum}
+	if [ $? -ne 0 ]; then
+		echo "Installing puppet ${puppet_version_yum}"
+		wget -q https://yum.puppetlabs.com/RPM-GPG-KEY-puppet -O /tmp/RPM-GPG-KEY-puppet
+		rpm --import /tmp/RPM-GPG-KEY-puppet
+		rpm -ivh https://yum.puppetlabs.com/puppetlabs-release-el-${RELEASEVER}.noarch.rpm
+		yum install -y ${puppet_version_yum} >> /tmp/provision.shell.log 2>&1
+		yum versionlock puppet
+	else
+		echo "Puppet already installed"
+	fi
 	# run update
 	echo "yum update..."
 	yum -y update >> /tmp/provision.shell.log 2>&1
+
 
 fi
 
 
 if [ -f "/etc/debian_version" ];then
 	echo "Debian/Ubuntu or something...."
-
+	. /etc/lsb-release
+	# TODO: detect debian/ubuntu
     echo "Replacing /etc/apt/sources.list"
 		cat > /etc/apt/sources.list << EOFDEB
-deb mirror://mirrors.ubuntu.com/mirrors.txt trusty main restricted universe multiverse
-deb mirror://mirrors.ubuntu.com/mirrors.txt trusty-updates main restricted universe multiverse
-deb mirror://mirrors.ubuntu.com/mirrors.txt trusty-backports main restricted universe multiverse
-deb mirror://mirrors.ubuntu.com/mirrors.txt trusty-security main restricted universe multiverse
+deb mirror://mirrors.ubuntu.com/mirrors.txt ${DISTRIB_CODENAME} main restricted universe multiverse
+deb mirror://mirrors.ubuntu.com/mirrors.txt ${DISTRIB_CODENAME}-updates main restricted universe multiverse
+deb mirror://mirrors.ubuntu.com/mirrors.txt ${DISTRIB_CODENAME}-backports main restricted universe multiverse
+deb mirror://mirrors.ubuntu.com/mirrors.txt ${DISTRIB_CODENAME}-security main restricted universe multiverse
 EOFDEB
 
 	echo "Installing puppet ${puppet_version_apt}"

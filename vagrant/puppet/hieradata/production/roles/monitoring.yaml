@@ -1,4 +1,7 @@
 ---
+classes:
+  - role::monitoring
+
 graphite::gr_pip_install: true
 graphite::secret_key: 'mai0raepo2loofeese5Ooph2uo0zee7i'
 graphite::gr_timezone: 'Europe/Warsaw'

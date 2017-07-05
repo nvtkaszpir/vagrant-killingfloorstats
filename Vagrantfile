@@ -18,11 +18,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # fix for bash errors while provisioning
   config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
-  # Every Vagrant virtual environment requires a box to build off of.
+  # Every Vagrant virtual environment requires a box to build
   config.vm.box = 'centos/7'
 
-
-  # application ports
   # puppet stuff and provisioning
   config.vm.synced_folder "./vagrant", "/vagrant",
     id: "vagrant",
@@ -30,6 +28,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # rsync__verbose: true,
     rsync__exclude: [".git/", "puppet/.tmp/"]
 
+  # test suites
   config.vm.synced_folder "./test", "/tmp/test",
     id: "test",
     type: SYNC_TYPE,
@@ -72,7 +71,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Provisioners
   #########################################################################
 
-  config.vm.provision 'shell', :path => 'vagrant/bootstrap.sh'
+  # installs puppet and its dependencies
+  config.vm.provision "bootstrap",
+    type: 'shell',
+    :path => 'vagrant/bootstrap.sh'
 
   #########################################################################
   # VM definitions
@@ -105,31 +107,41 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       override.vm.hostname = "app"
     end
 
-    v.vm.provision "shell",
+    v.vm.provision "facter",
+      type: "shell",
       path: "vagrant/facter.sh",
       preserve_order: true,
       args: [
-        "role=#{:app}",
+        "role=#{:app}", # equals role=app
         "vagrant=1",
       ]
 
-    v.vm.provision "shell",
+    # downloads puppet modules from forge
+    v.vm.provision "librarian",
+      type: "shell",
       path: "vagrant/librarian-puppet.sh",
       preserve_order: true,
       args: ['/vagrant/puppet']
 
-    v.vm.provision "shell",
+    # after librarian is done, we can run puppet apply
+    v.vm.provision "puppet",
+      type: "shell",
       path: "vagrant/puppet-apply.sh",
       preserve_order: true,
       env: {
+        PUPPET_DIR: '/vagrant/puppet', # corresponds to rsynced folder
+        # PUPPET_ENVIRONMENT: "production",
+        # PUPPET_HIERA_CONFIG: "hiera.yaml",
+        # PUPPET_MANIFEST: "default.pp",
+        # PUPPET_MANIFST_DIR: "manifests/",
+        PUPPET_MODULEPATH: "modules:local_modules",
         PUPPET_OPTS: "--graph --graphdir /vagrant/graphs",
-        PUPPET_MANIFEST: "#{:app}.pp",
-        PUPPET_MODULE_PATH: '/vagrant/puppet/modules:/vagrant/puppet/local_modules',
-        PUPPET_DIR: '/vagrant/puppet',
         PUPPET_VERBOSE: "1",
       }
 
-    v.vm.provision "shell",
+    # print some final informations
+    v.vm.provision "info",
+      type: "shell",
       path: "vagrant/info.sh",
       preserve_order: true
 

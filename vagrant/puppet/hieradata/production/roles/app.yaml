@@ -1,4 +1,7 @@
 ---
+classes:
+  - role::app
+
 profile::app::domain: kfstats.hlds.pl #official domain for the app
 profile::app::dir: /srv/app # directory where app is deployed
 # this still requires http://<ipaddr>/SomeDirectroy/ request

@@ -3,7 +3,7 @@
   - yaml
 
 :yaml:
-  :datadir: /vagrant/puppet/hieradata
+  :datadir: "hieradata/%{environment}/"
 
 :hierarchy:
   - 'roles/%{::role}'

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 echo "========================================================================"
-ipconfig | grep inet
+ifconfig | grep inet
 ip addr  | grep inet
 hostname -I
 echo "========================================================================"

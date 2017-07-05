@@ -1,4 +1,7 @@
 ---
+classes:
+  - profile
+
 ntp::package_ensure: latest
 ntp::enable: true
 ntp::service_manage: true
