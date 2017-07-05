@@ -5,4 +5,10 @@
 !/vagrant/puppet/modules/.gitkeep
 /vagrant/graphs/*
 !/vagrant/graphs/.gitkeep
-test/integration/inspec/profiles/**/*.lock
+test/**/*.lock
+Puppetfile.lock
+Gemfile.lock
+.kitchen/
+.librarian/
+.tmp/
+reports/

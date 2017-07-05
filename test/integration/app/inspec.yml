@@ -1,5 +1,5 @@
-name: nvtkaszpir-killingfloorstats
-title: InSpec Profile for KillingFloorStats PHP script
+name: nvtkaszpir-kf-app
+title: InSpec Profile for kf-app PHP script
 maintainer: Michał Sochoń
 copyright: Michał Sochoń
 copyright_email: kaszpir@gmail.com
@@ -10,6 +10,10 @@ supports:
   - os-family: unix
 depends:
   - name: nvtkaszpir-nginx
-    path: ../../nvtkaszpir-nginx
+    path: ../nvtkaszpir-nginx
   - name: nvtkaszpir-php-fpm
-    path: ../../nvtkaszpir-php-fpm
+    path: ../nvtkaszpir-php-fpm
+  - name: nvtkaszpir-cockpit
+    path: ../nvtkaszpir-cockpit
+  - name: nvtkaszpir-monit
+    path: ../nvtkaszpir-monit

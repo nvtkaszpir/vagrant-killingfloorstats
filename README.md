@@ -126,7 +126,7 @@ Testing
 
 In ``test/`` you have various test suites:
 
-* ``integration/inspec`` - for testing vm after provisioning
+* ``integration/app/inspec`` - for testing our ``app`` vm after provisioning
 * ``benchmarks/`` - performance test in jmeter 3.1 (requires some jmeter plugins like 3 Basic Graps, 5 Additional Graphs, Custom Thread Groups, Composite timeline graph)
 
 
@@ -161,7 +161,7 @@ bundle install
 After that, you must resolve inspec vendors (and refresh .lock files):
 
 ```bash
-inspec vendor test/integration/inspec/profiles/nvtkaszpir-killingfloorstats/ --overwrite
+inspec vendor test/integration/app --overwrite
 ```
 
 Inspec test - vagrant
@@ -170,7 +170,7 @@ Inspec test - vagrant
 After resolving inspec vendor dependencies you can execute tests on vagrant box:
 
 ```bash
-inspec exec test/integration/inspec/profiles/nvtkaszpir-killingfloorstats -t ssh://127.0.0.1:2222 --user=vagrant --key-files=.vagrant/machines/app/virtualbox/private_key --sudo --profiles-path=test/integration/inspec/
+inspec exec test/integration/app/ -t ssh://127.0.0.1:2222 --user=vagrant --key-files=.vagrant/machines/app/virtualbox/private_key --sudo --profiles-path=test/integration/
 
 ```
 
@@ -178,7 +178,7 @@ If you use custom provider for vagrant, then you may need to adjust ssh:// and -
 For example I use libvirt provider, so I use below command:
 
 ```bash
-inspec exec test/integration/inspec/profiles/nvtkaszpir-killingfloorstats -t ssh://192.168.121.224 --user=vagrant --key-files=.vagrant/machines/app/libvirt/private_key --sudo --profiles-path=test/integration/inspec/
+inspec exec test/integration/app/ -t ssh://192.168.121.224 --user=vagrant --key-files=.vagrant/machines/app/libvirt/private_key --sudo --profiles-path=test/integration/
 ```
 
 See ``vagrant ssh-config`` for more details.
@@ -189,7 +189,7 @@ Inspec test - remote host
 Example running integration tests with inspec against normal server:
 
 ```bash
-inspec exec test/integration/inspec/profiles/nvtkaszpir-killingfloorstats -t ssh://some-user@some-host.tld --user=vagrant --key-files=/home/kaszpir/.ssh/id_rsa --sudo --profiles-path=test/integration/inspec/
+inspec exec test/integration/app/ -t ssh://some-user@some-host.tld --user=vagrant --key-files=/home/kaszpir/.ssh/id_rsa --sudo --profiles-path=test/integration/
 
 ```
 

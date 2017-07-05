@@ -7,9 +7,12 @@ VH=${VAGRANT_HOST:-"app"}
 export VH
 echo VH="${VH}"
 
+inspec vendor --overwrite \
+	test/integration/${VH}/
+
 inspec exec \
-	test/integration/inspec/profiles/nvtkaszpir-kf-${VH} \
-	--profiles-path=test/integration/inspec/ \
+	test/integration/${VH}/ \
+	--profiles-path=test/integration/ \
 	-t ssh://$(vagrant ssh-config ${VH} | grep 'HostName ' | awk '{print $2}') \
 	--user=$(vagrant ssh-config ${VH} | grep 'User ' | awk '{print $2}') \
 	--key-files=$(vagrant ssh-config ${VH} | grep 'IdentityFile ' | awk '{print $2}') \
