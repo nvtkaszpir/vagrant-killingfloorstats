@@ -52,7 +52,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # QEMU/KVM under linux
   config.vm.provider :kvm do |kvm|
-    kvm.vm.box = "centos7lxc"
     kvm.core_number = V_CPU
     kvm.memory_size = "#{V_MEM_TOTAL}MiB" # leave doublequotes
     #config.vm.synced_folder ".", "/vagrant", type: "nfs"
