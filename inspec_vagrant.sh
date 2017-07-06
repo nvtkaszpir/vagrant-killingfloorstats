@@ -13,7 +13,8 @@ inspec vendor --overwrite \
 inspec exec \
 	test/integration/${VH}/ \
 	--profiles-path=test/integration/ \
-	-t ssh://$(vagrant ssh-config ${VH} | grep 'HostName ' | awk '{print $2}') \
+	--target ssh://$(vagrant ssh-config ${VH} | grep 'HostName ' | awk '{print $2}') \
+	--port $(vagrant ssh-config ${VH} | grep 'Port ' | awk '{print $2}') \
 	--user=$(vagrant ssh-config ${VH} | grep 'User ' | awk '{print $2}') \
 	--key-files=$(vagrant ssh-config ${VH} | grep 'IdentityFile ' | awk '{print $2}') \
 	--sudo
