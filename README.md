@@ -10,11 +10,11 @@ Requirements
 Your local machine should have the following:
 
 * 2 CPU cores, 2GB of RAM, about 8GB of disk space required for vm
-* vagrant > 1.2.x - download and install https://www.vagrantup.com/
+* vagrant > 1.2.x - download and install from [official site](https://www.vagrantup.com/)
 * rsync client
 * access to the Internet without proxies (not supported in this setup via vagrant/bootstrap/puppet)
-* jmeter 3.1 with plugin manager and plugins for benchmark tests
-* ruby 2.x.x and bundler for running more advanced tests (inspec)
+* jmeter 3.1 with plugin manager and plugins for benchmark tests, can be takne from [here](https://jmeter-plugins.org/)
+* ruby 2.x.x and bundler for running more advanced tests (inspec), use [rvm.io](http://rvm.io/)
 
 Known limitation
 ==================================================
@@ -193,6 +193,28 @@ inspec exec test/integration/app/ -t ssh://some-user@some-host.tld --user=vagran
 
 ```
 
-
 Notice that cockpit service can be down if not used for few mintues,
 it is automatically spawned by systemd on port 9090 activity.
+
+
+Running tests with test-kitchen
+--------------------------------------------------
+
+If you have installed gems lie above, you should be able to also use test-kichen to verify configurations.
+More about test-kichen can be found at [kitchen.ci](http://kitchen.ci/).
+
+* ``.kitchen.yml`` - uses standard vagrant with virtualbox provider
+* ``.kitchen.lxc.yml`` - if you use LXC you may find it useful.
+* ``.kitchen.libvirt.yml`` - if you use qemu/kvm with libvirt
+* ``.kitchen.libvirt.jenkins.yml`` - as above but outputs inspec tests as junit xml files to ``reports/`` dir.
+
+Copy one of above files to ``.kitchen.local.yml``, depending on your favourite provider.
+
+Next, issue ``kitchen status`` to see machine stauts, should show a list.
+
+Use ``kitchen converge`` to create instances.
+Use ``kitchen verify`` to check if instances conform with inspec tests.
+Use ``kitchen destroy`` to delete create machine after work.
+Use ``kitchen test`` to run all above in single run. Any error will abort creating of other machines if ran in sequence.
+
+You can use it as a base to expand to different platforms and provisioners, for example to move to Debian and Ansible.

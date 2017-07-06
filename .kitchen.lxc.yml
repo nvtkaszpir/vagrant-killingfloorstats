@@ -1,0 +1,64 @@
+---
+driver_plugin: lxc
+
+driver:
+  name: vagrant
+  provider: lxc
+  customize:
+    aa_allow_incomplete: 1
+    # enable fuse in containers
+    #ppp
+    cgroup.devices.allow: 'c 108:0 rwm'
+    #fuse
+    cgroup.devices.allow: 'c 10:229 rwm'
+    #loop0
+    cgroup.devices.allow: 'b 7:0 rwm'
+    #tun
+    cgroup.devices.allow: 'c 10:200 rwm'
+
+transport:
+  name: sftp # kitchen-sync does not work properly with test-kitchen 1.4.x
+  compression_level: 6
+
+provisioner:
+  name: puppet_apply
+  manifests_path: vagrant/puppet/manifests/
+  modules_path: "vagrant/puppet/modules/:vagrant/puppet/local_modules/"
+  hiera_data_path: vagrant/puppet/hiera
+  hiera_config_path: vagrant/puppet/hiera.kitchen.yaml
+  manifest: default.pp
+  puppet_verbose: true
+  require_chef_for_busser: false
+  custom_facts:
+    location: vagrant
+
+verifier:
+  name: inspec
+  sudo: true
+  # format: junit
+  # output: reports/integration/%{platform}_%{suite}_inspec.xml
+  # profiles_path: inspec
+  # inspec_tests:
+  #   - path: test/integration/app/inspec/
+
+platforms:
+  - name: centos7-lxc
+    driver:
+      box: st01tkh/centos7-64-lxc
+    driver_config:
+      username: vagrant
+      password: vagrant
+    provisioner:
+      custom_pre_install_command: |
+        sudo ip a
+        sudo sed -i -e 's/enabled=1/enabled=0/g' /etc/yum/pluginconf.d/fastestmirror.conf
+        sudo yum clean all
+        sudo yum install -y virt-what
+        sudo yum update -y
+
+suites:
+  - name: app
+    provisioner:
+      install_custom_facts: true
+      custom_facts:
+        role: 'app'

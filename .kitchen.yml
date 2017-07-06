@@ -1,0 +1,53 @@
+---
+# driver_plugin: virtualbox
+
+driver:
+  name: vagrant
+  # provider: virtualbox
+
+transport:
+  name: sftp # kitchen-sync does not work properly with test-kitchen 1.4.x
+  compression_level: 6
+
+provisioner:
+  name: puppet_apply
+  manifests_path: vagrant/puppet/manifests/
+  modules_path: "vagrant/puppet/modules/:vagrant/puppet/local_modules/"
+  hiera_data_path: vagrant/puppet/hiera
+  hiera_config_path: vagrant/puppet/hiera.kitchen.yaml
+  manifest: default.pp
+  puppet_verbose: true
+  require_chef_for_busser: false
+  custom_facts:
+    location: vagrant
+
+verifier:
+  name: inspec
+  sudo: true
+  # format: junit
+  # output: reports/integration/%{platform}_%{suite}_inspec.xml
+  # profiles_path: inspec
+  # inspec_tests:
+  #   - path: test/integration/app/inspec/
+
+platforms:
+  - name: centos7
+    driver:
+      box: centos/7
+    driver_config:
+      username: vagrant
+      # password: vagrant
+    provisioner:
+      custom_pre_install_command: |
+        sudo ip a
+        sudo sed -i -e 's/enabled=1/enabled=0/g' /etc/yum/pluginconf.d/fastestmirror.conf
+        sudo yum clean all
+        sudo yum install -y virt-what
+        sudo yum update -y
+
+suites:
+  - name: app
+    provisioner:
+      install_custom_facts: true
+      custom_facts:
+        role: 'app'

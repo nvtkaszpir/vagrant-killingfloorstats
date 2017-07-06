@@ -12,3 +12,4 @@ Gemfile.lock
 .librarian/
 .tmp/
 reports/
+.kitchen.local.yml
