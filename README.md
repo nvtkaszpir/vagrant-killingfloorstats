@@ -2,7 +2,7 @@ About
 ==================================================
 
 Example app from beginning to end, using Infrastructure as Code idea.
-
+Actually the app is just an add-on to play around with creating fully working CI/CD repo :)
 
 Requirements
 ==================================================
@@ -13,21 +13,25 @@ Your local machine should have the following:
 * vagrant > 1.2.x - download and install from [official site](https://www.vagrantup.com/)
 * rsync client
 * access to the Internet without proxies (not supported in this setup via vagrant/bootstrap/puppet)
-* jmeter 3.1 with plugin manager and plugins for benchmark tests, can be takne from [here](https://jmeter-plugins.org/)
+* jmeter 3.1 with [plugin manager and plugins](https://jmeter-plugins.org/) for benchmark tests
 * ruby 2.x.x and bundler for running more advanced tests (inspec), use [rvm.io](http://rvm.io/)
 
 Known limitation
 ==================================================
 
-* don't try to use it under Windows platform, there is too much dependency to ruby not to support it here. (TODO: get rid of vagrant plugin, move all into vm: rvm + gem + librarian-puppet, adjust provisioning scripts) - so right now you can create vm to create vm... :)
+* don't try to use it under Windows platform, there is too much dependency to ruby not to support
+  it here. (TODO: get rid of vagrant plugin, move all into vm: rvm + gem + librarian-puppet,
+  adjust provisioning scripts) - so right now you can create vm to create vm... :)
 * try vagrant 1.9.x from official download page, cause system packages may have issues
 * you may need to adjust Vagrantfile depending on your vm provider and rsync options
 * centos 7.3 as base vagrant box - tested with qemu/kvm, virtualbox
 * monit as simple monitoring, it provides web interface (see below)
 * monit does not send any notifications in this setup.
 * configuration management using puppet 3.8.7 - a bit ancient nowadays...
-* cockpit does not start on first puppet run (because it generates cert on first start), so exec puppet twice
-* cockpit is shut down as service by sytemd after some time, triggering connection on port 9090 launches it again
+* cockpit does not start on first puppet run (because it generates cert on first start),
+  so exec puppet twice
+* cockpit is shut down as service by sytemd after some time, triggering connection on port 9090
+  launches it again (surprisingly that is not the case under LXC)
 
 Directory structure
 ==================================================
@@ -100,15 +104,17 @@ Instead of VirtualBox you can use qemu/KVM with libvirt:
 vagrant up app --provider=libvirt
 ```
 
-For LXC you should see for example https://app.vagrantup.com/frensjan/boxes/centos-7-64-lxc or custom image,
-but notice that then port forwarding may not work - find out container IP and use direct app ports, in Puppet/hiera.
+For LXC you should see for example [this](https://app.vagrantup.com/frensjan/boxes/centos-7-64-lxc)
+or custom image, but notice that then port forwarding may not work - find out container
+IP and use direct app ports, in Puppet/hiera.
 
 
 Puppet tuning
 --------------------------------------------------
 
-* Puppetfile - used to manage puppet modules. It will be updated during provision but is not rsynced back to your host.
-See ``vagrant/puppet/Puppetfile``, in case of problems like ``Could not resolve the dependencies.`` try on your machine:
+* Puppetfile - used to manage puppet modules. It will be updated during provision but is not rsynced
+  back to your host. See ``vagrant/puppet/Puppetfile``, in case of problems like
+  ``Could not resolve the dependencies.`` try on your machine:
 
 ```bash
 gem instal librarian-puppet
@@ -118,7 +124,8 @@ librarian-puppet install --verbose
 ```
 
 * See ``vagrant/puppet/`` for the configuration setting using Puppet.
-See especially``vagrant/puppet/hieradata/roles/app.yaml`` for app server tweaks like php settings, nginx and so on
+
+See especially``vagrant/puppet/hiera/production/roles/app.yaml`` for app server tweaks.
 
 
 Testing
@@ -127,18 +134,21 @@ Testing
 In ``test/`` you have various test suites:
 
 * ``integration/app/inspec`` - for testing our ``app`` vm after provisioning
-* ``benchmarks/`` - performance test in jmeter 3.1 (requires some jmeter plugins like 3 Basic Graps, 5 Additional Graphs, Custom Thread Groups, Composite timeline graph)
+* ``benchmarks/`` - performance test in jmeter 3.1 (requires some jmeter plugins like
+   3 Basic Graps, 5 Additional Graphs, Custom Thread Groups, Composite timeline graph).
 
 
 Benchmark test
 --------------------------------------------------
 
-Install jmeter 3.1 and plugins using Plugins Manager.
-Load test file from ``test/benchmark/stress.jmx`` and adjust default testing parameters for HTTP request, like IP and port.
+Install jmeter 3.1 and plugins using Plugins Manager [here](https://jmeter-plugins.org/).
+Load test file from ``test/benchmark/stress.jmx`` and adjust default testing parameters for
+HTTP request, like IP and port.
 
 In the future this could be expanded so that jmeter would take that data from env vars.
 
 TODO: add exact info about jmeter plugins
+TODO: parametrize .jmx file to load vars from env
 
 
 Inspec test - checking dependencies
@@ -170,15 +180,25 @@ Inspec test - vagrant
 After resolving inspec vendor dependencies you can execute tests on vagrant box:
 
 ```bash
-inspec exec test/integration/app/ -t ssh://127.0.0.1:2222 --user=vagrant --key-files=.vagrant/machines/app/virtualbox/private_key --sudo --profiles-path=test/integration/
+inspec exec test/integration/app/ \
+    -t ssh://127.0.0.1:2222 \
+    --user=vagrant \
+    --key-files=.vagrant/machines/app/virtualbox/private_key \
+    --sudo \
+    --profiles-path=test/integration/
 
 ```
 
-If you use custom provider for vagrant, then you may need to adjust ssh:// and --key-files to suit your setup.
-For example I use libvirt provider, so I use below command:
+If you use custom provider for vagrant, then you may need to adjust ssh:// and --key-files
+to suit your setup. For example I use libvirt provider, so I use below command:
 
 ```bash
-inspec exec test/integration/app/ -t ssh://192.168.121.224 --user=vagrant --key-files=.vagrant/machines/app/libvirt/private_key --sudo --profiles-path=test/integration/
+inspec exec test/integration/app/ \
+    -t ssh://192.168.121.224 \
+    --user=vagrant \
+    --key-files=.vagrant/machines/app/libvirt/private_key \
+    --sudo \
+    --profiles-path=test/integration/
 ```
 
 See ``vagrant ssh-config`` for more details.
@@ -189,32 +209,92 @@ Inspec test - remote host
 Example running integration tests with inspec against normal server:
 
 ```bash
-inspec exec test/integration/app/ -t ssh://some-user@some-host.tld --user=vagrant --key-files=/home/kaszpir/.ssh/id_rsa --sudo --profiles-path=test/integration/
+inspec exec test/integration/app/ \
+    -t ssh://some-user@some-host.tld \
+    --user=vagrant \
+    --key-files=/home/kaszpir/.ssh/id_rsa \
+    --sudo \
+    --profiles-path=test/integration/
 
 ```
 
-Notice that cockpit service can be down if not used for few mintues,
+Notice that cockpit service can be down if not used for few minutes,
 it is automatically spawned by systemd on port 9090 activity.
 
 
 Running tests with test-kitchen
 --------------------------------------------------
 
-If you have installed gems lie above, you should be able to also use test-kichen to verify configurations.
-More about test-kichen can be found at [kitchen.ci](http://kitchen.ci/).
+If you have installed gems like above, you should be able to also use test-kichen to verify
+different configurations - now there is Centos only with single app.
+More about test-kitchen can be found at [kitchen.ci](http://kitchen.ci/).
+
+Kitchen takes two files for setup: ``.kitchen.yml`` and ``.kitchen.local.yml``.
+In this repot there is more:
 
 * ``.kitchen.yml`` - uses standard vagrant with virtualbox provider
 * ``.kitchen.lxc.yml`` - if you use LXC you may find it useful.
 * ``.kitchen.libvirt.yml`` - if you use qemu/kvm with libvirt
-* ``.kitchen.libvirt.jenkins.yml`` - as above but outputs inspec tests as junit xml files to ``reports/`` dir.
+* ``.kitchen.libvirt.jenkins.yml`` - as above but outputs inspec tests as junit xml to reports dir.
 
-Copy one of above files to ``.kitchen.local.yml``, depending on your favourite provider.
+Copy one of above files to ``.kitchen.local.yml``, depending on your favorite provider.
 
-Next, issue ``kitchen status`` to see machine stauts, should show a list.
+Next, issue ``kitchen status`` to see machine status - should show a list.
 
-Use ``kitchen converge`` to create instances.
-Use ``kitchen verify`` to check if instances conform with inspec tests.
-Use ``kitchen destroy`` to delete create machine after work.
-Use ``kitchen test`` to run all above in single run. Any error will abort creating of other machines if ran in sequence.
+* Use ``kitchen converge`` to create instances.
+* Use ``kitchen verify`` to check if instances conform with inspec tests.
+* Use ``kitchen destroy`` to delete create machine after work.
+* Use ``kitchen test`` to run all above in single run.
 
-You can use it as a base to expand to different platforms and provisioners, for example to move to Debian and Ansible.
+Any error will abort creating of other machines if ran in sequence.
+Usally you want to run converge and verify, till tests and provisioning is complete, then re-run
+whole process again to create instances from scratch.
+
+Notice that test-kitchen with kitchen-puppet plugin takes care to execute librarian-puppet
+locally on your machine prior creating virtual machines - so it will download puppet modules,
+and avoids installing rvm + gems on the guest (as it is done with standard Vagrantfile).
+
+So test-kitchen can be used as a base to expand to different platforms and provisioners,
+for example:
+
+* add Debian and Ubuntu as platforms
+* add new apps suites, for example with different PHP version
+* add new provisioners like Ansible
+
+Further expanding
+==================================================
+
+Important
+--------------------------------------------------
+
+* contributing section (if anyone really cares)
+* jenkinsfile or jenkins job DSL, build with junit - make bagno.hlds.pl feel the pain of existence
+* puppet - add location to hiera, expand hiera per location, add vagrant as location + facts
+* puppet - add firewall
+* puppet - production should eradicate vagrant user and sudoers
+* tags, cause repos love tags
+* vagrant - add xdebug
+* simple puppet verifier?
+* parametrize jmeter + performance tests with jmeter
+* vagrant push
+* Fabric deployment script
+* Ansible deployment script
+* packer templates
+* nginx microcaching, casue our super-duper app does nothing fancy, can be cached for 5min
+* makefile or gradle? ruby, python soon, java, groovy, ... someone said phing?
+
+Later
+--------------------------------------------------
+
+* more detailed inspec tests, now thery are really super simple
+* more sane test for monit if app still works
+* puppet deployment script (yeah, go mental, puppet does not really works well with it)
+* puppet - hiera eyaml?
+* migrate to puppet 4 or beyond!
+* migrate from pupet to ansible
+* use blazemeter taurus for above?
+* docker, yeah, we need docker cause docker, and devops, docker, and docker!
+* migrate to docker-compose or something like that
+* integrate code smells / sonarqube
+* integrate security scans
+* add travis ...for...what? afair it cannot do nested vms
