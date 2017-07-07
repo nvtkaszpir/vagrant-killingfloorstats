@@ -37,11 +37,14 @@ Known limitation
 Cloning the repo
 ==================================================
 
-Remember to download git submodules
+Remember to download git repo with submodules:
+
 ```bash
-git clone https://github.com/nvtkaszpir/vagrant-killingfloorstats
-git submodule update --init
+git clone --recursive https://github.com/nvtkaszpir/vagrant-killingfloorstats
 ```
+
+More at [official git book](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
+
 
 Directory structure
 ==================================================
