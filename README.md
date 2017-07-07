@@ -33,6 +33,16 @@ Known limitation
 * cockpit is shut down as service by sytemd after some time, triggering connection on port 9090
   launches it again (surprisingly that is not the case under LXC)
 
+
+Cloning the repo
+==================================================
+
+Remember to download git submodules
+```bash
+git clone https://github.com/nvtkaszpir/vagrant-killingfloorstats
+git submodule update --init
+```
+
 Directory structure
 ==================================================
 
