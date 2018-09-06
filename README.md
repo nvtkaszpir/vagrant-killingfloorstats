@@ -59,9 +59,12 @@ Starting up
 To start from scratch
 
 ```bash
-rbenv install 2.4.4
-rbenv local 2.4.4
+#rbenv install 2.4.4
+#rbenv local 2.4.4
+rbenv install
+rbenv rehash
 gem install bundler
+bundle clean --force
 bundle install
 
 vagrant up app
@@ -176,9 +179,12 @@ Example running integration tests with inspec against vagrant. Notice, that it r
 Before running inspec, update ruby using rbenv and gems, short version:
 
 ```bash
-rbenv install 2.4.4
-rbenv local 2.4.4
+#rbenv install 2.4.4
+#rbenv local 2.4.4
+rbenv install
+rbenv rehash
 gem install bundler
+bundle clean --force
 bundle install
 ```
 
