@@ -14,13 +14,13 @@ Your local machine should have the following:
 * rsync client
 * access to the Internet without proxies (not supported in this setup via vagrant/bootstrap/puppet)
 * jmeter 3.1 with [plugin manager and plugins](https://jmeter-plugins.org/) for benchmark tests
-* ruby 2.x.x and bundler for running more advanced tests (inspec), use [rvm.io](http://rvm.io/)
+* ruby 2.x.x and bundler for running more advanced tests (inspec), use [rbenv.org](http://rbenv.org/)
 
 Known limitation
 ==================================================
 
 * don't try to use it under Windows platform, there is too much dependency to ruby not to support
-  it here. (TODO: get rid of vagrant plugin, move all into vm: rvm + gem + librarian-puppet,
+  it here. (TODO: get rid of vagrant plugin, move all into vm: rbenv + gem + librarian-puppet,
   adjust provisioning scripts) - so right now you can create vm to create vm... :)
 * try vagrant 1.9.x from official download page, cause system packages may have issues
 * you may need to adjust Vagrantfile depending on your vm provider and rsync options
@@ -59,6 +59,10 @@ Starting up
 To start from scratch
 
 ```bash
+rbenv install 2.4.4
+rbenv local 2.4.4
+gem install bundler
+bundle install
 
 vagrant up app
 
@@ -169,16 +173,13 @@ Inspec test - checking dependencies
 
 Example running integration tests with inspec against vagrant. Notice, that it requires ruby on local machine.
 
-Before running inspec, update ruby using rvm and gems, short version:
+Before running inspec, update ruby using rbenv and gems, short version:
 
 ```bash
-gpg2 --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
-\curl -sSL https://get.rvm.io | bash -s stable
-source ~/.rvm/scripts/rvm
-rvm install 2.3.1 --install --binary --fuzzy
-rvm use 2.31
+rbenv install 2.4.4
+rbenv local 2.4.4
 gem install bundler
-bundle install --jobs=3 --retry=3
+bundle install
 ```
 
 After that, you must resolve inspec vendors (and refresh .lock files):
@@ -265,7 +266,7 @@ whole process again to create instances from scratch.
 
 Notice that test-kitchen with kitchen-puppet plugin takes care to execute librarian-puppet
 locally on your machine prior creating virtual machines - so it will download puppet modules,
-and avoids installing rvm + gems on the guest (as it is done with standard Vagrantfile).
+and avoids installing rbenv + gems on the guest (as it is done with standard Vagrantfile).
 
 So test-kitchen can be used as a base to expand to different platforms and provisioners,
 for example:

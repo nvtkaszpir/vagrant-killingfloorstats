@@ -7,7 +7,7 @@ php_version = '5.6'
 php_listen     = ['127.0.0.1']
 php_listen_t   = ['tcp']
 php_listen_p   = 9000
-php_listen_pr  = ['php-fpm:'] # this ':' is not an error
+php_listen_pr  = ['php-fpm']
 
 control 'php-fpm-package' do
   impact 1.0

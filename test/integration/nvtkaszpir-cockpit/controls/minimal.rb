@@ -6,7 +6,7 @@ title 'cockpit'
 cockpit_path       = '/etc/cockpit'
 cockpit_conf       = File.join(cockpit_path, 'cockpit.conf')
 cockpit_listen_p   = 9090
-cockpit_listen_t   = ['tcp6']
+cockpit_listen_t   = ['tcp']
 cockpit_listen_pr  = ['systemd']
 
 control 'cockpit-service' do
