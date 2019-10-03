@@ -58,7 +58,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   # QEMU/KVM via libVirt
-  config.vm.provider :libvirt do |libvirt|
+  config.vm.provider :libvirt do |libvirt, override|
+    override.vm.box_version = '1905.1'
     libvirt.cpus   = V_CPU
     libvirt.memory = V_MEM_TOTAL
     libvirt.driver = 'kvm'
