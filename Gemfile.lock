@@ -38,7 +38,7 @@ GEM
       childprocess
       rye
     erubis (2.7.0)
-    excon (0.62.0)
+    excon (0.71.0)
     facter (2.5.1)
     faraday (0.13.1)
       multipart-post (>= 1.2, < 3)
