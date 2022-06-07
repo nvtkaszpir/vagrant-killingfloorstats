@@ -103,7 +103,7 @@ GEM
       thor (~> 0.19)
       tomlrb (~> 1.2)
       train (~> 1.2)
-    jmespath (1.4.0)
+    jmespath (1.6.1)
     json (2.1.0)
     json_pure (2.1.0)
     jwt (2.1.0)
